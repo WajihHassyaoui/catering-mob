@@ -79,33 +79,35 @@ class AdminCateringScreen extends ConsumerWidget {
       context,
       title: 'Quote builder',
       isScrollControlled: true,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.pagePadding,
-          0,
-          AppSpacing.pagePadding,
-          AppSpacing.xl,
-        ),
-        child: Column(
-          children: [
-            AppTextField(
-              label: 'Base price',
-              hint: request?.quotedPrice?.toStringAsFixed(0) ?? '8075',
-              prefixIcon: Icons.payments_outlined,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            const AppTextArea(
-              label: 'Operations notes',
-              hint: 'Menu, service staffing, dietary handling...',
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            AppButton(
-              label: 'Send quote',
-              icon: Icons.send_outlined,
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pagePadding,
+            0,
+            AppSpacing.pagePadding,
+            AppSpacing.xl,
+          ),
+          child: Column(
+            children: [
+              AppTextField(
+                label: 'Base price',
+                hint: request?.quotedPrice?.toStringAsFixed(0) ?? '8075',
+                prefixIcon: Icons.payments_outlined,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              const AppTextArea(
+                label: 'Operations notes',
+                hint: 'Menu, service staffing, dietary handling...',
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              AppButton(
+                label: 'Send quote',
+                icon: Icons.send_outlined,
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
         ),
       ),
     );

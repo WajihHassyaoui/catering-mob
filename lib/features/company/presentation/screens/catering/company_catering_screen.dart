@@ -103,40 +103,42 @@ class CompanyCateringScreen extends ConsumerWidget {
       context,
       title: 'Event request',
       isScrollControlled: true,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.pagePadding,
-          0,
-          AppSpacing.pagePadding,
-          AppSpacing.xl,
-        ),
-        child: Column(
-          children: [
-            const AppTextField(
-              label: 'Event type',
-              hint: 'Leadership offsite',
-              prefixIcon: Icons.event_outlined,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            const AppTextField(
-              label: 'Guests',
-              hint: '80',
-              prefixIcon: Icons.people_outline_rounded,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            const AppTextField(
-              label: 'Budget range',
-              hint: '\$5,000 - \$10,000',
-              prefixIcon: Icons.payments_outlined,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            AppButton(
-              label: 'Review request',
-              icon: Icons.arrow_forward_rounded,
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pagePadding,
+            0,
+            AppSpacing.pagePadding,
+            AppSpacing.xl,
+          ),
+          child: Column(
+            children: [
+              const AppTextField(
+                label: 'Event type',
+                hint: 'Leadership offsite',
+                prefixIcon: Icons.event_outlined,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              const AppTextField(
+                label: 'Guests',
+                hint: '80',
+                prefixIcon: Icons.people_outline_rounded,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              const AppTextField(
+                label: 'Budget range',
+                hint: '\$5,000 - \$10,000',
+                prefixIcon: Icons.payments_outlined,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              AppButton(
+                label: 'Review request',
+                icon: Icons.arrow_forward_rounded,
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/constants/app_colors.dart';
@@ -184,7 +185,10 @@ class DashboardStatCard extends StatelessWidget {
         builder: (context, constraints) {
           final useSpacer = constraints.hasBoundedHeight;
           return Container(
-            padding: const EdgeInsets.all(AppSpacing.cardPadding),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
             decoration: BoxDecoration(
               gradient: AppColors.cardGradient,
               borderRadius: BorderRadius.circular(AppRadius.card),
@@ -282,22 +286,45 @@ class PremiumImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = borderRadius ?? BorderRadius.circular(AppRadius.image);
+    
+    Widget imageWidget;
+    if (imageUrl == null || imageUrl!.isEmpty) {
+      imageWidget = _placeholder();
+    } else if (imageUrl!.startsWith('data:image/')) {
+      try {
+        final commaIndex = imageUrl!.indexOf(',');
+        if (commaIndex != -1) {
+          final base64Data = imageUrl!.substring(commaIndex + 1);
+          final bytes = base64Decode(base64Data);
+          imageWidget = Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _placeholder(),
+          );
+        } else {
+          imageWidget = _placeholder();
+        }
+      } catch (_) {
+        imageWidget = _placeholder();
+      }
+    } else {
+      imageWidget = Image.network(
+        imageUrl!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _placeholder(),
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return _placeholder(showPulse: true);
+        },
+      );
+    }
+
     return ClipRRect(
       borderRadius: radius,
       child: SizedBox(
         width: width,
         height: height,
-        child: imageUrl == null
-            ? _placeholder()
-            : Image.network(
-                imageUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _placeholder(),
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return _placeholder(showPulse: true);
-                },
-              ),
+        child: imageWidget,
       ),
     );
   }
@@ -1072,7 +1099,9 @@ class AppBottomSheet extends StatelessWidget {
             const Divider(height: AppSpacing.lg, color: AppColors.lightBorder),
           ] else
             const SizedBox(height: AppSpacing.md),
-          child,
+          Flexible(
+            child: child,
+          ),
           SizedBox(
               height: MediaQuery.of(context).padding.bottom + AppSpacing.md),
         ],

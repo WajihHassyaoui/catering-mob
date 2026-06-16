@@ -58,7 +58,7 @@ class CompanyDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final company = MockData.approvedCompany;
-    final groupOrders = MockData.groupOrders;
+    final groupOrders = MockData.groupOrders.where((g) => g.companyId == company.id).toList();
     final cateringRequests = MockData.cateringRequests;
     final invoices = MockData.invoices;
     final unpaidInvoices = invoices.where((i) => !i.isPaid).toList();
@@ -271,7 +271,7 @@ class _MetricsGrid extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: AppSpacing.md,
         mainAxisSpacing: AppSpacing.md,
-        childAspectRatio: 1.12,
+        childAspectRatio: 0.90,
       ),
       itemCount: metrics.length,
       itemBuilder: (_, i) => metrics[i],

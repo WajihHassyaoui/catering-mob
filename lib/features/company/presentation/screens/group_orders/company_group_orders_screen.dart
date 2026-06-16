@@ -17,7 +17,7 @@ class CompanyGroupOrdersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final groupOrders = MockData.groupOrders;
+    final groupOrders = MockData.groupOrders.where((g) => g.companyId == MockData.approvedCompany.id).toList();
 
     return Scaffold(
       backgroundColor: AppColors.creamBackground,
@@ -99,35 +99,37 @@ class CompanyGroupOrdersScreen extends ConsumerWidget {
     AppBottomSheet.show(
       context,
       title: 'Create group order',
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.pagePadding,
-          0,
-          AppSpacing.pagePadding,
-          AppSpacing.xl,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const StepProgressIndicator(
-              totalSteps: 5,
-              currentStep: 1,
-              labels: ['Menu', 'Place', 'Time', 'Invite', 'Review'],
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text('Start with a menu package', style: AppTypography.titleLg),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'The full wizard can connect to the backend later. This preview keeps the UX shape ready.',
-              style: AppTypography.bodyMd.copyWith(color: AppColors.mutedText),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            AppButton(
-              label: 'Continue setup',
-              icon: Icons.arrow_forward_rounded,
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pagePadding,
+            0,
+            AppSpacing.pagePadding,
+            AppSpacing.xl,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const StepProgressIndicator(
+                totalSteps: 5,
+                currentStep: 1,
+                labels: ['Menu', 'Place', 'Time', 'Invite', 'Review'],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Text('Start with a menu package', style: AppTypography.titleLg),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'The full wizard can connect to the backend later. This preview keeps the UX shape ready.',
+                style: AppTypography.bodyMd.copyWith(color: AppColors.mutedText),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              AppButton(
+                label: 'Continue setup',
+                icon: Icons.arrow_forward_rounded,
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
         ),
       ),
       isScrollControlled: true,

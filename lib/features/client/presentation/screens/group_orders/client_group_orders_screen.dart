@@ -6,6 +6,7 @@ import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/constants/app_typography.dart';
 import '../../../../../shared/mock_data/mock_data.dart';
 import '../../../../../shared/models/group_order_model.dart';
+import '../../../../../shared/models/order_model.dart';
 import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/app_text_field.dart';
 import '../../../../../shared/widgets/common_widgets.dart';
@@ -87,35 +88,37 @@ class _ClientGroupOrdersScreenState extends ConsumerState<ClientGroupOrdersScree
     AppBottomSheet.show(
       context,
       title: 'Group Order Options',
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.pagePadding,
-          0,
-          AppSpacing.pagePadding,
-          AppSpacing.xl,
-        ),
-        child: Column(
-          children: [
-            _ActionTile(
-              icon: Icons.vpn_key_rounded,
-              title: 'Join Group Order',
-              subtitle: 'Enter an invite code shared by your team manager.',
-              onTap: () {
-                Navigator.pop(context);
-                _showJoinDialog(context);
-              },
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _ActionTile(
-              icon: Icons.group_add_rounded,
-              title: 'Create Group Order',
-              subtitle: 'Start a new group order for your department.',
-              onTap: () {
-                Navigator.pop(context);
-                _showCreateDialog(context);
-              },
-            ),
-          ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pagePadding,
+            0,
+            AppSpacing.pagePadding,
+            AppSpacing.xl,
+          ),
+          child: Column(
+            children: [
+              _ActionTile(
+                icon: Icons.vpn_key_rounded,
+                title: 'Join Group Order',
+                subtitle: 'Enter an invite code shared by your team manager.',
+                onTap: () {
+                  Navigator.pop(context);
+                  _showJoinDialog(context);
+                },
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _ActionTile(
+                icon: Icons.group_add_rounded,
+                title: 'Create Group Order',
+                subtitle: 'Start a new group order for your department.',
+                onTap: () {
+                  Navigator.pop(context);
+                  _showCreateDialog(context);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -230,8 +233,8 @@ class _ClientGroupOrdersScreenState extends ConsumerState<ClientGroupOrdersScree
                       final newOrder = GroupOrder(
                         id: 'go_${DateTime.now().millisecondsSinceEpoch}',
                         name: nameCtrl.text.trim(),
-                        companyId: 'co_1',
-                        companyName: 'TechFlow Solutions',
+                        companyId: null,
+                        companyName: null,
                         creatorId: 'u_client_1',
                         creatorName: 'Alex Morgan',
                         status: 'open',
@@ -245,8 +248,28 @@ class _ClientGroupOrdersScreenState extends ConsumerState<ClientGroupOrdersScree
                         createdAt: DateTime.now(),
                       );
 
+                      final adminOrder = OrderModel(
+                        id: 'ord_${DateTime.now().millisecondsSinceEpoch}',
+                        orderNumber: 'ORD-${1000 + (newOrder.id.hashCode % 8999).abs()}',
+                        userId: 'u_client_1',
+                        companyId: null,
+                        companyName: null,
+                        items: const [],
+                        status: 'pending',
+                        deliveryAddress: newOrder.deliveryAddress,
+                        deliveryDate: newOrder.deliveryDate,
+                        deliveryTime: newOrder.deliveryTime,
+                        subtotal: 0.0,
+                        deliveryFee: 5.0,
+                        tax: 0.0,
+                        total: 5.0,
+                        paymentMethod: 'invoice',
+                        createdAt: newOrder.createdAt,
+                      );
+
                       setState(() {
                         MockData.groupOrders.insert(0, newOrder);
+                        MockData.orders.insert(0, adminOrder);
                       });
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -365,38 +388,40 @@ class _ClientGroupOrdersScreenState extends ConsumerState<ClientGroupOrdersScree
     AppBottomSheet.show(
       context,
       title: groupOrder.name,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.pagePadding,
-          0,
-          AppSpacing.pagePadding,
-          AppSpacing.xl,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${groupOrder.participantCount} people joined. Deadline ${groupOrder.deadlineCountdown}.',
-              style: AppTypography.bodyMd.copyWith(color: AppColors.mutedText),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            StepProgressIndicator(
-              totalSteps: 3,
-              currentStep:
-                  groupOrder.participants.any((p) => p.hasSubmitted) ? 3 : 1,
-              labels: const ['Joined', 'Meal', 'Confirm'],
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            AppButton(
-              label: 'Select meal',
-              icon: Icons.restaurant_menu_rounded,
-              onPressed: () {
-                ref.read(activeGroupOrderProvider.notifier).state = groupOrder;
-                ref.read(clientNavIndexProvider.notifier).state = 1;
-                Navigator.pop(context);
-              },
-            ),
-          ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pagePadding,
+            0,
+            AppSpacing.pagePadding,
+            AppSpacing.xl,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${groupOrder.participantCount} people joined. Deadline ${groupOrder.deadlineCountdown}.',
+                style: AppTypography.bodyMd.copyWith(color: AppColors.mutedText),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              StepProgressIndicator(
+                totalSteps: 3,
+                currentStep:
+                    groupOrder.participants.any((p) => p.hasSubmitted) ? 3 : 1,
+                labels: const ['Joined', 'Meal', 'Confirm'],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              AppButton(
+                label: 'Select meal',
+                icon: Icons.restaurant_menu_rounded,
+                onPressed: () {
+                  ref.read(activeGroupOrderProvider.notifier).state = groupOrder;
+                  ref.read(clientNavIndexProvider.notifier).state = 1;
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

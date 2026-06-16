@@ -224,7 +224,7 @@ class _Metrics extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: AppSpacing.md,
         mainAxisSpacing: AppSpacing.md,
-        childAspectRatio: 1.12,
+        childAspectRatio: 0.92,
       ),
       itemCount: metrics.length,
       itemBuilder: (_, i) => metrics[i],
