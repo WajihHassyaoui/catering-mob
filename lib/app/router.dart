@@ -12,7 +12,13 @@ import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/auth/presentation/screens/pending_approval_screen.dart';
 import '../features/client/presentation/navigation/client_navigation.dart';
 import '../features/client/presentation/screens/profile/client_profile_screen.dart';
+import '../features/client/presentation/screens/profile/edit_profile_screen.dart';
+import '../features/client/presentation/screens/profile/my_addresses_screen.dart';
+import '../features/client/presentation/screens/profile/favorite_meals_screen.dart';
+import '../features/client/presentation/screens/profile/my_reviews_screen.dart';
 import '../features/company/presentation/navigation/company_navigation.dart';
+import '../features/client/presentation/screens/orders/track_order_screen.dart';
+import '../features/client/presentation/screens/meals/meal_detail_screen.dart';
 import '../features/admin/presentation/navigation/admin_navigation.dart';
 import '../core/constants/app_constants.dart';
 import '../shared/mock_data/mock_data.dart';
@@ -89,13 +95,31 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: 'meals/:id',
-                builder: (_, state) => _PlaceholderScreen(
-                    'Meal Detail: ${state.pathParameters['id']}'),
+                builder: (_, state) => MealDetailScreen(
+                  mealId: state.pathParameters['id'] ?? '',
+                ),
               ),
               GoRoute(
                 path: 'orders/:id/track',
-                builder: (_, state) => _PlaceholderScreen(
-                    'Track Order: ${state.pathParameters['id']}'),
+                builder: (_, state) => TrackOrderScreen(
+                  orderId: state.pathParameters['id'] ?? '',
+                ),
+              ),
+              GoRoute(
+                path: 'profile/edit',
+                builder: (_, __) => const EditProfileScreen(),
+              ),
+              GoRoute(
+                path: 'profile/addresses',
+                builder: (_, __) => const MyAddressesScreen(),
+              ),
+              GoRoute(
+                path: 'profile/favorites',
+                builder: (_, __) => const FavoriteMealsScreen(),
+              ),
+              GoRoute(
+                path: 'profile/reviews',
+                builder: (_, __) => const MyReviewsScreen(),
               ),
             ],
           ),
@@ -126,6 +150,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: 'profile',
                 builder: (_, __) => const ClientProfileScreen(),
               ),
+              GoRoute(
+                path: 'profile/edit',
+                builder: (_, __) => const EditProfileScreen(),
+              ),
             ],
           ),
           GoRoute(
@@ -135,6 +163,10 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'profile',
                 builder: (_, __) => const ClientProfileScreen(),
+              ),
+              GoRoute(
+                path: 'profile/edit',
+                builder: (_, __) => const EditProfileScreen(),
               ),
             ],
           ),

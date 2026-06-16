@@ -146,4 +146,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(status: AuthStatus.unauthenticated, error: null);
     }
   }
+
+  void updateUser(UserModel user) {
+    state = state.copyWith(user: user);
+  }
 }

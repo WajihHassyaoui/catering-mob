@@ -8,7 +8,7 @@ import '../screens/meals/meals_list_screen.dart';
 import '../screens/orders/my_orders_screen.dart';
 import '../screens/profile/client_profile_screen.dart';
 
-final clientNavIndexProvider = StateProvider<int>((ref) => 0);
+import '../providers/client_providers.dart';
 
 class ClientNavigation extends ConsumerWidget {
   const ClientNavigation({super.key});

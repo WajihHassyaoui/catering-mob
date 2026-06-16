@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../providers/client_providers.dart';
+import '../../../../../shared/models/group_order_model.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/constants/app_typography.dart';
 import '../../../../../shared/mock_data/mock_meals.dart';
+import '../../../../../shared/mock_data/mock_data.dart';
 import '../../../../../shared/models/meal_model.dart';
 import '../../../../../shared/widgets/common_widgets.dart';
 import '../../../../../shared/widgets/empty_state_widget.dart';
@@ -23,6 +26,7 @@ class MealsListScreen extends ConsumerWidget {
     final selectedCat = ref.watch(_selectedCategoryProvider);
     final query = ref.watch(_searchQueryProvider);
     final selectedTags = ref.watch(_selectedTagsProvider);
+    final activeGroupOrder = ref.watch(activeGroupOrderProvider);
 
     List<MealModel> meals = MockMeals.meals;
     if (selectedCat != null) meals = MockMeals.getMealsByCategory(selectedCat);
@@ -36,87 +40,170 @@ class MealsListScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.creamBackground,
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.pagePadding,
-                  AppSpacing.xl,
-                  AppSpacing.pagePadding,
-                  AppSpacing.md,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Curated menu',
-                        style:
-                            AppTypography.displayMedium.copyWith(fontSize: 34)),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Office-friendly meals with clear nutrition, prep times, and dietary flags.',
-                      style: AppTypography.bodyMd
-                          .copyWith(color: AppColors.mutedText),
+        child: Column(
+          children: [
+            if (activeGroupOrder != null)
+              _GroupOrderSelectionBanner(
+                groupOrder: activeGroupOrder,
+                onCancel: () {
+                  ref.read(activeGroupOrderProvider.notifier).state = null;
+                },
+              ),
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.pagePadding,
+                        AppSpacing.xl,
+                        AppSpacing.pagePadding,
+                        AppSpacing.md,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Curated menu',
+                              style:
+                                  AppTypography.displayMedium.copyWith(fontSize: 34)),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            'Office-friendly meals with clear nutrition, prep times, and dietary flags.',
+                            style: AppTypography.bodyMd
+                                .copyWith(color: AppColors.mutedText),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+                          _SearchBar(ref: ref),
+                          const SizedBox(height: AppSpacing.lg),
+                          _CategoryChips(ref: ref),
+                          const SizedBox(height: AppSpacing.md),
+                          _DietaryFilters(ref: ref),
+                          const SizedBox(height: AppSpacing.sectionSpacing),
+                          SectionHeader(
+                            title: '${meals.length} meals available',
+                            subtitle: selectedCat == null
+                                ? 'All categories'
+                                : _categoryName(selectedCat),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: AppSpacing.xl),
-                    _SearchBar(ref: ref),
-                    const SizedBox(height: AppSpacing.lg),
-                    _CategoryChips(ref: ref),
-                    const SizedBox(height: AppSpacing.md),
-                    _DietaryFilters(ref: ref),
-                    const SizedBox(height: AppSpacing.sectionSpacing),
-                    SectionHeader(
-                      title: '${meals.length} meals available',
-                      subtitle: selectedCat == null
-                          ? 'All categories'
-                          : _categoryName(selectedCat),
+                  ),
+                  if (meals.isEmpty)
+                    SliverFillRemaining(
+                      child: EmptyStateWidget(
+                        icon: Icons.no_food_outlined,
+                        title: 'No meals found',
+                        message: 'Try another category or remove a dietary filter.',
+                        actionLabel: 'Clear filters',
+                        onAction: () {
+                          ref.read(_selectedCategoryProvider.notifier).state = null;
+                          ref.read(_searchQueryProvider.notifier).state = '';
+                          ref.read(_selectedTagsProvider.notifier).state = [];
+                        },
+                      ),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.pagePadding,
+                        0,
+                        AppSpacing.pagePadding,
+                        AppSpacing.huge,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (_, i) => Padding(
+                            padding: EdgeInsets.only(
+                              bottom: i == meals.length - 1 ? 0 : AppSpacing.lg,
+                            ),
+                            child: MealCard(
+                              meal: meals[i],
+                              onTap: () =>
+                                  context.push('/client/meals/${meals[i].id}'),
+                              onAddToCart: () {
+                                if (activeGroupOrder != null) {
+                                  final meal = meals[i];
+                                  final matchIdx = MockData.groupOrders
+                                      .indexWhere((go) => go.id == activeGroupOrder.id);
+                                  if (matchIdx != -1) {
+                                    final targetOrder = MockData.groupOrders[matchIdx];
+                                    final existingParticipantIdx = targetOrder.participants
+                                        .indexWhere((p) => p.userId == 'u_client_1');
+
+                                    final mealSelection = GroupOrderMealSelection(
+                                      mealId: meal.id,
+                                      mealName: meal.name,
+                                      quantity: 1,
+                                      unitPrice: meal.price,
+                                    );
+
+                                    GroupOrderParticipant participant;
+                                    List<GroupOrderParticipant> updatedParticipants =
+                                        List.from(targetOrder.participants);
+
+                                    if (existingParticipantIdx != -1) {
+                                      final oldParticipant =
+                                          targetOrder.participants[existingParticipantIdx];
+                                      participant = GroupOrderParticipant(
+                                        id: oldParticipant.id,
+                                        userId: oldParticipant.userId,
+                                        userName: oldParticipant.userName,
+                                        department: oldParticipant.department,
+                                        userAvatar: oldParticipant.userAvatar,
+                                        mealSelections: [mealSelection],
+                                        hasSubmitted: true,
+                                        submittedAt: DateTime.now(),
+                                      );
+                                      updatedParticipants[existingParticipantIdx] = participant;
+                                    } else {
+                                      participant = GroupOrderParticipant(
+                                        id: 'p_${DateTime.now().millisecondsSinceEpoch}',
+                                        userId: 'u_client_1',
+                                        userName: 'Alex Morgan',
+                                        department: 'Engineering',
+                                        mealSelections: [mealSelection],
+                                        hasSubmitted: true,
+                                        submittedAt: DateTime.now(),
+                                      );
+                                      updatedParticipants.add(participant);
+                                    }
+
+                                    final newEstimatedTotal =
+                                        (targetOrder.estimatedTotal ?? 0) + meal.price;
+                                    MockData.groupOrders[matchIdx] = targetOrder.copyWith(
+                                      participants: updatedParticipants,
+                                      participantCount: updatedParticipants.length,
+                                      estimatedTotal: newEstimatedTotal,
+                                    );
+                                  }
+
+                                  ref.read(activeGroupOrderProvider.notifier).state = null;
+                                  ref.read(clientNavIndexProvider.notifier).state = 2;
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Meal "${meal.name}" submitted to group order "${activeGroupOrder.name}"!'),
+                                      backgroundColor: AppColors.oliveGreen,
+                                    ),
+                                  );
+                                } else {
+                                  _addToCart(context, meals[i].name);
+                                }
+                              },
+                            ),
+                          ).animate().fade(
+                                delay: Duration(milliseconds: i * 55),
+                                duration: 250.ms,
+                              ),
+                          childCount: meals.length,
+                        ),
+                      ),
                     ),
-                  ],
-                ),
+                ],
               ),
             ),
-            if (meals.isEmpty)
-              SliverFillRemaining(
-                child: EmptyStateWidget(
-                  icon: Icons.no_food_outlined,
-                  title: 'No meals found',
-                  message: 'Try another category or remove a dietary filter.',
-                  actionLabel: 'Clear filters',
-                  onAction: () {
-                    ref.read(_selectedCategoryProvider.notifier).state = null;
-                    ref.read(_searchQueryProvider.notifier).state = '';
-                    ref.read(_selectedTagsProvider.notifier).state = [];
-                  },
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.pagePadding,
-                  0,
-                  AppSpacing.pagePadding,
-                  AppSpacing.huge,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (_, i) => Padding(
-                      padding: EdgeInsets.only(
-                        bottom: i == meals.length - 1 ? 0 : AppSpacing.lg,
-                      ),
-                      child: MealCard(
-                        meal: meals[i],
-                        onTap: () =>
-                            context.push('/client/meals/${meals[i].id}'),
-                        onAddToCart: () => _addToCart(context, meals[i].name),
-                      ).animate().fade(
-                            delay: Duration(milliseconds: i * 55),
-                            duration: 250.ms,
-                          ),
-                    ),
-                    childCount: meals.length,
-                  ),
-                ),
-              ),
           ],
         ),
       ),
@@ -295,6 +382,80 @@ class _DietaryFilters extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+}
+
+class _GroupOrderSelectionBanner extends StatelessWidget {
+  final GroupOrder groupOrder;
+  final VoidCallback onCancel;
+
+  const _GroupOrderSelectionBanner({
+    required this.groupOrder,
+    required this.onCancel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.pagePadding, vertical: 12),
+      decoration: const BoxDecoration(
+        color: AppColors.oliveLight,
+        border: Border(
+          bottom: BorderSide(color: AppColors.softBorder),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.oliveGreen.withAlpha(22),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.restaurant_menu_rounded,
+              color: AppColors.oliveGreen,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Selecting meal for group order',
+                  style: AppTypography.labelSm
+                      .copyWith(color: AppColors.mutedText),
+                ),
+                Text(
+                  groupOrder.name,
+                  style: AppTypography.titleSm
+                      .copyWith(color: AppColors.oliveGreen),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: onCancel,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              'Cancel',
+              style: AppTypography.labelSm.copyWith(color: AppColors.terracotta),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

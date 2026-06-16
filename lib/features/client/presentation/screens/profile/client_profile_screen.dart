@@ -196,7 +196,7 @@ class _ProfileHero extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () => context.push('/${user.role}/profile/edit'),
             icon: const Icon(Icons.edit_outlined, color: AppColors.white),
           ),
         ],

@@ -12,7 +12,7 @@ import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/common_widgets.dart';
 import '../../../../../shared/widgets/meal_card.dart';
 import '../../../../../shared/widgets/status_badge.dart';
-import '../../navigation/client_navigation.dart';
+import '../../providers/client_providers.dart';
 
 class ClientHomeScreen extends ConsumerWidget {
   const ClientHomeScreen({super.key});
