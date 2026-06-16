@@ -221,14 +221,12 @@ class MemberPermissions {
   factory MemberPermissions.fromJson(Map<String, dynamic> json) =>
       MemberPermissions(
         canJoinGroupOrders: json['can_join_group_orders'] as bool? ?? true,
-        canCreateGroupOrders:
-            json['can_create_group_orders'] as bool? ?? false,
+        canCreateGroupOrders: json['can_create_group_orders'] as bool? ?? false,
         canPlaceIndividualOrders:
             json['can_place_individual_orders'] as bool? ?? true,
         canRequestCatering: json['can_request_catering'] as bool? ?? false,
         canApproveOrders: json['can_approve_orders'] as bool? ?? false,
-        canViewCompanyOrders:
-            json['can_view_company_orders'] as bool? ?? false,
+        canViewCompanyOrders: json['can_view_company_orders'] as bool? ?? false,
         canManageBilling: json['can_manage_billing'] as bool? ?? false,
         isCompanyAdmin: json['is_company_admin'] as bool? ?? false,
       );

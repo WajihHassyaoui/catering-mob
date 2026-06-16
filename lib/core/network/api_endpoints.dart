@@ -61,8 +61,7 @@ class ApiEndpoints {
 
   // Company — Group Orders
   static const String companyGroupOrders = '/company/group-orders';
-  static String companyGroupOrderById(String id) =>
-      '/company/group-orders/$id';
+  static String companyGroupOrderById(String id) => '/company/group-orders/$id';
   static String reviewGroupOrder(String id) =>
       '/company/group-orders/$id/review';
 

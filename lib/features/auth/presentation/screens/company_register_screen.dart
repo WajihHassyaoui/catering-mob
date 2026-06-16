@@ -14,7 +14,8 @@ class CompanyRegisterScreen extends ConsumerStatefulWidget {
   const CompanyRegisterScreen({super.key});
 
   @override
-  ConsumerState<CompanyRegisterScreen> createState() => _CompanyRegisterScreenState();
+  ConsumerState<CompanyRegisterScreen> createState() =>
+      _CompanyRegisterScreenState();
 }
 
 class _CompanyRegisterScreenState extends ConsumerState<CompanyRegisterScreen> {
@@ -30,13 +31,24 @@ class _CompanyRegisterScreenState extends ConsumerState<CompanyRegisterScreen> {
   String? _size;
 
   static const _industries = [
-    'Technology', 'Finance', 'Healthcare', 'Media & Marketing',
-    'Education', 'Real Estate', 'Legal', 'Consulting', 'Retail', 'Other',
+    'Technology',
+    'Finance',
+    'Healthcare',
+    'Media & Marketing',
+    'Education',
+    'Real Estate',
+    'Legal',
+    'Consulting',
+    'Retail',
+    'Other',
   ];
 
   static const _sizes = [
-    '1–10 employees', '11–50 employees', '51–200 employees',
-    '201–500 employees', '500+ employees',
+    '1–10 employees',
+    '11–50 employees',
+    '51–200 employees',
+    '201–500 employees',
+    '500+ employees',
   ];
 
   @override
@@ -87,90 +99,111 @@ class _CompanyRegisterScreenState extends ConsumerState<CompanyRegisterScreen> {
             children: [
               _sectionHeader('Company Information', Icons.business_outlined, 0),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppTextField(
-                label: 'Company Name',
-                hint: 'TechFlow Solutions',
-                controller: _companyNameCtrl,
-                prefixIcon: Icons.business_outlined,
-                validator: AppValidators.companyName,
-              ), 1),
+              _field(
+                  AppTextField(
+                    label: 'Company Name',
+                    hint: 'TechFlow Solutions',
+                    controller: _companyNameCtrl,
+                    prefixIcon: Icons.business_outlined,
+                    validator: AppValidators.companyName,
+                  ),
+                  1),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppDropdown<String>(
-                label: 'Industry',
-                value: _industry,
-                hint: 'Select industry',
-                prefixIcon: Icons.category_outlined,
-                items: _industries
-                    .map((i) => DropdownMenuItem(value: i, child: Text(i)))
-                    .toList(),
-                onChanged: (v) => setState(() => _industry = v),
-                validator: (v) => v == null ? 'Please select an industry.' : null,
-              ), 2),
+              _field(
+                  AppDropdown<String>(
+                    label: 'Industry',
+                    value: _industry,
+                    hint: 'Select industry',
+                    prefixIcon: Icons.category_outlined,
+                    items: _industries
+                        .map((i) => DropdownMenuItem(value: i, child: Text(i)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _industry = v),
+                    validator: (v) =>
+                        v == null ? 'Please select an industry.' : null,
+                  ),
+                  2),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppDropdown<String>(
-                label: 'Company Size',
-                value: _size,
-                hint: 'Number of employees',
-                prefixIcon: Icons.people_outline_rounded,
-                items: _sizes
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                    .toList(),
-                onChanged: (v) => setState(() => _size = v),
-                validator: (v) => v == null ? 'Please select company size.' : null,
-              ), 3),
+              _field(
+                  AppDropdown<String>(
+                    label: 'Company Size',
+                    value: _size,
+                    hint: 'Number of employees',
+                    prefixIcon: Icons.people_outline_rounded,
+                    items: _sizes
+                        .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _size = v),
+                    validator: (v) =>
+                        v == null ? 'Please select company size.' : null,
+                  ),
+                  3),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppTextField(
-                label: 'Company Website',
-                hint: 'https://yourcompany.com',
-                controller: _websiteCtrl,
-                keyboardType: TextInputType.url,
-                prefixIcon: Icons.language_outlined,
-                validator: AppValidators.website,
-              ), 4),
+              _field(
+                  AppTextField(
+                    label: 'Company Website',
+                    hint: 'https://yourcompany.com',
+                    controller: _websiteCtrl,
+                    keyboardType: TextInputType.url,
+                    prefixIcon: Icons.language_outlined,
+                    validator: AppValidators.website,
+                  ),
+                  4),
               const SizedBox(height: AppSpacing.xxl),
-              _sectionHeader('Admin Account', Icons.admin_panel_settings_outlined, 5),
+              _sectionHeader(
+                  'Admin Account', Icons.admin_panel_settings_outlined, 5),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppTextField(
-                label: 'Your Full Name',
-                hint: 'Jordan Lee',
-                controller: _adminNameCtrl,
-                prefixIcon: Icons.person_outline_rounded,
-                validator: AppValidators.fullName,
-              ), 6),
+              _field(
+                  AppTextField(
+                    label: 'Your Full Name',
+                    hint: 'Jordan Lee',
+                    controller: _adminNameCtrl,
+                    prefixIcon: Icons.person_outline_rounded,
+                    validator: AppValidators.fullName,
+                  ),
+                  6),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppTextField(
-                label: 'Work Email',
-                hint: 'you@yourcompany.com',
-                controller: _emailCtrl,
-                keyboardType: TextInputType.emailAddress,
-                prefixIcon: Icons.email_outlined,
-                validator: AppValidators.email,
-              ), 7),
+              _field(
+                  AppTextField(
+                    label: 'Work Email',
+                    hint: 'you@yourcompany.com',
+                    controller: _emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    prefixIcon: Icons.email_outlined,
+                    validator: AppValidators.email,
+                  ),
+                  7),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppTextField(
-                label: 'Phone Number',
-                controller: _phoneCtrl,
-                keyboardType: TextInputType.phone,
-                prefixIcon: Icons.phone_outlined,
-                validator: AppValidators.phone,
-              ), 8),
+              _field(
+                  AppTextField(
+                    label: 'Phone Number',
+                    controller: _phoneCtrl,
+                    keyboardType: TextInputType.phone,
+                    prefixIcon: Icons.phone_outlined,
+                    validator: AppValidators.phone,
+                  ),
+                  8),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppTextField(
-                label: 'Password',
-                controller: _passCtrl,
-                obscureText: true,
-                prefixIcon: Icons.lock_outline_rounded,
-                validator: AppValidators.password,
-              ), 9),
+              _field(
+                  AppTextField(
+                    label: 'Password',
+                    controller: _passCtrl,
+                    obscureText: true,
+                    prefixIcon: Icons.lock_outline_rounded,
+                    validator: AppValidators.password,
+                  ),
+                  9),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppTextField(
-                label: 'Confirm Password',
-                controller: _confirmCtrl,
-                obscureText: true,
-                prefixIcon: Icons.lock_outline_rounded,
-                textInputAction: TextInputAction.done,
-                validator: AppValidators.confirmPassword(_passCtrl.text),
-              ), 10),
+              _field(
+                  AppTextField(
+                    label: 'Confirm Password',
+                    controller: _confirmCtrl,
+                    obscureText: true,
+                    prefixIcon: Icons.lock_outline_rounded,
+                    textInputAction: TextInputAction.done,
+                    validator: AppValidators.confirmPassword(_passCtrl.text),
+                  ),
+                  10),
               const SizedBox(height: AppSpacing.xl),
               Container(
                 padding: const EdgeInsets.all(AppSpacing.cardPadding),
@@ -181,13 +214,16 @@ class _CompanyRegisterScreenState extends ConsumerState<CompanyRegisterScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.schedule_outlined, color: AppColors.warmGold, size: 20),
+                    const Icon(Icons.schedule_outlined,
+                        color: AppColors.warmGold, size: 20),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Pending Approval', style: AppTypography.titleSm.copyWith(color: AppColors.warmGold)),
+                          Text('Pending Approval',
+                              style: AppTypography.titleSm
+                                  .copyWith(color: AppColors.warmGold)),
                           const SizedBox(height: 2),
                           Text(
                             'Company accounts require admin approval before you can place orders. This typically takes 1–2 business days.',
@@ -207,7 +243,9 @@ class _CompanyRegisterScreenState extends ConsumerState<CompanyRegisterScreen> {
                     color: AppColors.errorRed.withAlpha(20),
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
-                  child: Text(auth.error!, style: AppTypography.bodySm.copyWith(color: AppColors.errorRed)),
+                  child: Text(auth.error!,
+                      style: AppTypography.bodySm
+                          .copyWith(color: AppColors.errorRed)),
                 ),
               ],
               const SizedBox(height: AppSpacing.xxl),
@@ -238,7 +276,9 @@ class _CompanyRegisterScreenState extends ConsumerState<CompanyRegisterScreen> {
         const SizedBox(width: AppSpacing.md),
         Text(title, style: AppTypography.titleLg),
       ],
-    ).animate().fade(delay: Duration(milliseconds: delay * 60), duration: 300.ms);
+    )
+        .animate()
+        .fade(delay: Duration(milliseconds: delay * 60), duration: 300.ms);
   }
 
   Widget _field(Widget field, int index) {

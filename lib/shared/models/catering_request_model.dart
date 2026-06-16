@@ -184,12 +184,11 @@ class MealPrepPlan {
             List<String>.from(json['dietary_preferences'] as List? ?? []),
         allergies: List<String>.from(json['allergies'] as List? ?? []),
         calorieTarget: json['calorie_target'] as int?,
-        deliveryDays:
-            List<String>.from(json['delivery_days'] as List? ?? []),
+        deliveryDays: List<String>.from(json['delivery_days'] as List? ?? []),
         deliveryAddress: json['delivery_address'] as String,
         budget: (json['budget'] as num?)?.toDouble(),
-        assignedEmployeeIds: List<String>.from(
-            json['assigned_employee_ids'] as List? ?? []),
+        assignedEmployeeIds:
+            List<String>.from(json['assigned_employee_ids'] as List? ?? []),
         notes: json['notes'] as String?,
         status: json['status'] as String,
         startDate: DateTime.parse(json['start_date'] as String),

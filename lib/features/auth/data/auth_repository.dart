@@ -25,7 +25,8 @@ class AuthRepository {
       throw Exception('Incorrect password. Please try again.');
     }
 
-    final token = 'mock_token_${user.id}_${DateTime.now().millisecondsSinceEpoch}';
+    final token =
+        'mock_token_${user.id}_${DateTime.now().millisecondsSinceEpoch}';
     await _storage.saveToken(token);
     await _storage.saveRefreshToken('mock_refresh_${user.id}');
     await _storage.saveUserRole(user.role);

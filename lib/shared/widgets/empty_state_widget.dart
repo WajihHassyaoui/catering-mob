@@ -32,15 +32,30 @@ class EmptyStateWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 88,
-              height: 88,
+              width: 104,
+              height: 104,
               decoration: BoxDecoration(
-                color: (iconColor ?? AppColors.oliveGreen).withAlpha(20),
-                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    (iconColor ?? AppColors.oliveGreen).withAlpha(38),
+                    AppColors.warmIvory,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(color: AppColors.white.withAlpha(180)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppColors.ambientShadow,
+                    blurRadius: 28,
+                    offset: Offset(0, 16),
+                  ),
+                ],
               ),
               child: Icon(
                 icon,
-                size: 40,
+                size: 44,
                 color: (iconColor ?? AppColors.oliveGreen).withAlpha(180),
               ),
             )
@@ -65,6 +80,8 @@ class EmptyStateWidget extends StatelessWidget {
               message,
               style: AppTypography.bodyMd.copyWith(color: AppColors.mutedText),
               textAlign: TextAlign.center,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
             )
                 .animate()
                 .fade(delay: 250.ms, duration: 300.ms)
@@ -121,12 +138,9 @@ class LoadingSkeleton extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: AppColors.shimmerBase,
-        borderRadius:
-            borderRadius ?? BorderRadius.circular(AppRadius.sm),
+        borderRadius: borderRadius ?? BorderRadius.circular(AppRadius.sm),
       ),
-    )
-        .animate(onPlay: (c) => c.repeat())
-        .shimmer(
+    ).animate(onPlay: (c) => c.repeat()).shimmer(
           duration: 1200.ms,
           color: AppColors.shimmerHighlight,
         );
@@ -134,20 +148,37 @@ class LoadingSkeleton extends StatelessWidget {
 }
 
 class CardSkeleton extends StatelessWidget {
-  const CardSkeleton({super.key});
+  final bool large;
+
+  const CardSkeleton({super.key, this.large = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.warmIvory,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.lightBorder),
+        border: Border.all(color: AppColors.softBorder),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.ambientShadow,
+            blurRadius: 22,
+            offset: Offset(0, 12),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (large) ...[
+            LoadingSkeleton(
+              width: double.infinity,
+              height: 132,
+              borderRadius: BorderRadius.circular(AppRadius.image),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
           Row(
             children: [
               const LoadingSkeleton.circle(size: 48),
@@ -156,7 +187,9 @@ class CardSkeleton extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    LoadingSkeleton.line(width: double.infinity * 0.6, height: 14),
+                    LoadingSkeleton.line(
+                        width: MediaQuery.of(context).size.width * 0.42,
+                        height: 14),
                     const SizedBox(height: 8),
                     const LoadingSkeleton.line(height: 12),
                   ],
@@ -169,9 +202,14 @@ class CardSkeleton extends StatelessWidget {
           const SizedBox(height: 6),
           const LoadingSkeleton.line(height: 12),
           const SizedBox(height: 6),
-          LoadingSkeleton.line(width: MediaQuery.of(context).size.width * 0.5, height: 12),
+          LoadingSkeleton.line(
+              width: MediaQuery.of(context).size.width * 0.5, height: 12),
         ],
       ),
     );
   }
+}
+
+class ShimmerLoadingCard extends CardSkeleton {
+  const ShimmerLoadingCard({super.key, super.large = true});
 }

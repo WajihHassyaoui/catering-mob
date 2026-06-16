@@ -25,7 +25,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     if (!mounted) return;
 
     final auth = ref.read(authProvider);
-    if (auth.status == AuthStatus.initial || auth.status == AuthStatus.loading) {
+    if (auth.status == AuthStatus.initial ||
+        auth.status == AuthStatus.loading) {
       await Future.delayed(const Duration(milliseconds: 800));
     }
 
@@ -54,17 +55,24 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.oliveGreen,
+      backgroundColor: AppColors.creamBackground,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 96,
-              height: 96,
+              width: 110,
+              height: 110,
               decoration: BoxDecoration(
-                color: AppColors.white.withAlpha(25),
-                borderRadius: BorderRadius.circular(28),
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.oliveGreen.withAlpha(48),
+                    blurRadius: 28,
+                    offset: const Offset(0, 16),
+                  ),
+                ],
               ),
               child: const Icon(
                 Icons.restaurant_rounded,
@@ -83,8 +91,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             Text(
               'Platter',
               style: AppTypography.displayBold.copyWith(
-                color: AppColors.white,
-                letterSpacing: -0.5,
+                color: AppColors.charcoal,
+                letterSpacing: 0,
               ),
             )
                 .animate()
@@ -94,9 +102,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             Text(
               'Catering',
               style: AppTypography.headingMd.copyWith(
-                color: AppColors.white.withAlpha(200),
-                fontWeight: FontWeight.w300,
-                letterSpacing: 4,
+                color: AppColors.oliveGreen,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0,
               ),
             )
                 .animate()
@@ -106,19 +114,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             Text(
               'Premium Corporate Catering & Meal Prep',
               style: AppTypography.bodySm.copyWith(
-                color: AppColors.white.withAlpha(150),
-                letterSpacing: 0.3,
+                color: AppColors.mutedText,
+                letterSpacing: 0,
               ),
-            )
-                .animate()
-                .fade(delay: 700.ms, duration: 400.ms),
+            ).animate().fade(delay: 700.ms, duration: 400.ms),
             const SizedBox(height: 80),
             SizedBox(
               width: 24,
               height: 24,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: AppColors.white.withAlpha(120),
+                color: AppColors.oliveGreen.withAlpha(150),
               ),
             ).animate().fade(delay: 1000.ms, duration: 400.ms),
           ],

@@ -14,7 +14,8 @@ class ClientRegisterScreen extends ConsumerStatefulWidget {
   const ClientRegisterScreen({super.key});
 
   @override
-  ConsumerState<ClientRegisterScreen> createState() => _ClientRegisterScreenState();
+  ConsumerState<ClientRegisterScreen> createState() =>
+      _ClientRegisterScreenState();
 }
 
 class _ClientRegisterScreenState extends ConsumerState<ClientRegisterScreen> {
@@ -72,53 +73,67 @@ class _ClientRegisterScreenState extends ConsumerState<ClientRegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Personal Details', style: AppTypography.headingMd)
-                  .animate().fade(duration: 300.ms),
+                  .animate()
+                  .fade(duration: 300.ms),
               const SizedBox(height: 4),
-              Text('Tell us a bit about yourself.', style: AppTypography.bodyMd.copyWith(color: AppColors.mutedText))
-                  .animate().fade(delay: 100.ms, duration: 300.ms),
+              Text('Tell us a bit about yourself.',
+                      style: AppTypography.bodyMd
+                          .copyWith(color: AppColors.mutedText))
+                  .animate()
+                  .fade(delay: 100.ms, duration: 300.ms),
               const SizedBox(height: AppSpacing.xxl),
-              _field(AppTextField(
-                label: 'Full Name',
-                hint: 'Alex Morgan',
-                controller: _nameCtrl,
-                prefixIcon: Icons.person_outline_rounded,
-                validator: AppValidators.fullName,
-              ), 0),
+              _field(
+                  AppTextField(
+                    label: 'Full Name',
+                    hint: 'Alex Morgan',
+                    controller: _nameCtrl,
+                    prefixIcon: Icons.person_outline_rounded,
+                    validator: AppValidators.fullName,
+                  ),
+                  0),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppTextField(
-                label: 'Email Address',
-                hint: 'alex@email.com',
-                controller: _emailCtrl,
-                keyboardType: TextInputType.emailAddress,
-                prefixIcon: Icons.email_outlined,
-                validator: AppValidators.email,
-              ), 1),
+              _field(
+                  AppTextField(
+                    label: 'Email Address',
+                    hint: 'alex@email.com',
+                    controller: _emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    prefixIcon: Icons.email_outlined,
+                    validator: AppValidators.email,
+                  ),
+                  1),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppTextField(
-                label: 'Phone Number',
-                hint: '+1 (555) 000-0000',
-                controller: _phoneCtrl,
-                keyboardType: TextInputType.phone,
-                prefixIcon: Icons.phone_outlined,
-                validator: AppValidators.phone,
-              ), 2),
+              _field(
+                  AppTextField(
+                    label: 'Phone Number',
+                    hint: '+1 (555) 000-0000',
+                    controller: _phoneCtrl,
+                    keyboardType: TextInputType.phone,
+                    prefixIcon: Icons.phone_outlined,
+                    validator: AppValidators.phone,
+                  ),
+                  2),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppTextField(
-                label: 'Password',
-                controller: _passCtrl,
-                obscureText: true,
-                prefixIcon: Icons.lock_outline_rounded,
-                validator: AppValidators.password,
-              ), 3),
+              _field(
+                  AppTextField(
+                    label: 'Password',
+                    controller: _passCtrl,
+                    obscureText: true,
+                    prefixIcon: Icons.lock_outline_rounded,
+                    validator: AppValidators.password,
+                  ),
+                  3),
               const SizedBox(height: AppSpacing.lg),
-              _field(AppTextField(
-                label: 'Confirm Password',
-                controller: _confirmCtrl,
-                obscureText: true,
-                prefixIcon: Icons.lock_outline_rounded,
-                validator: AppValidators.confirmPassword(_passCtrl.text),
-                textInputAction: TextInputAction.done,
-              ), 4),
+              _field(
+                  AppTextField(
+                    label: 'Confirm Password',
+                    controller: _confirmCtrl,
+                    obscureText: true,
+                    prefixIcon: Icons.lock_outline_rounded,
+                    validator: AppValidators.confirmPassword(_passCtrl.text),
+                    textInputAction: TextInputAction.done,
+                  ),
+                  4),
               const SizedBox(height: AppSpacing.xl),
               Container(
                 padding: const EdgeInsets.all(AppSpacing.cardPadding),
@@ -136,8 +151,10 @@ class _ClientRegisterScreenState extends ConsumerState<ClientRegisterScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Join a Company', style: AppTypography.titleSm),
-                            Text('Have an invite code?', style: AppTypography.bodySm),
+                            Text('Join a Company',
+                                style: AppTypography.titleSm),
+                            Text('Have an invite code?',
+                                style: AppTypography.bodySm),
                           ],
                         ),
                         Switch(
@@ -155,7 +172,8 @@ class _ClientRegisterScreenState extends ConsumerState<ClientRegisterScreen> {
                         hint: 'TECH-LUNCH-42',
                         controller: _inviteCtrl,
                         prefixIcon: Icons.vpn_key_outlined,
-                        validator: _hasInviteCode ? AppValidators.inviteCode : null,
+                        validator:
+                            _hasInviteCode ? AppValidators.inviteCode : null,
                       ),
                     ],
                   ],
@@ -204,10 +222,13 @@ class _ClientRegisterScreenState extends ConsumerState<ClientRegisterScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded, size: 16, color: AppColors.errorRed),
+          const Icon(Icons.error_outline_rounded,
+              size: 16, color: AppColors.errorRed),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(error, style: AppTypography.bodySm.copyWith(color: AppColors.errorRed)),
+            child: Text(error,
+                style:
+                    AppTypography.bodySm.copyWith(color: AppColors.errorRed)),
           ),
         ],
       ),

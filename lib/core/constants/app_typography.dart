@@ -24,116 +24,128 @@ class AppTypography {
       );
 
   // Display
-  static TextStyle get _display1 => GoogleFonts.dmSerifDisplay(
+  static TextStyle get _display1 => GoogleFonts.outfit(
         fontSize: 48,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w800,
         color: AppColors.charcoal,
         height: 1.1,
+        letterSpacing: 0,
       );
 
-  static TextStyle get _display2 => GoogleFonts.dmSerifDisplay(
+  static TextStyle get _display2 => GoogleFonts.outfit(
         fontSize: 40,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w800,
         color: AppColors.charcoal,
         height: 1.15,
+        letterSpacing: 0,
       );
 
-  static TextStyle get _display3 => GoogleFonts.dmSerifDisplay(
+  static TextStyle get _display3 => GoogleFonts.outfit(
         fontSize: 32,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         color: AppColors.charcoal,
         height: 1.2,
+        letterSpacing: 0,
       );
 
   // Headline
-  static TextStyle get _headline1 => GoogleFonts.dmSans(
+  static TextStyle get _headline1 => GoogleFonts.outfit(
         fontSize: 28,
         fontWeight: FontWeight.w700,
         color: AppColors.charcoal,
         height: 1.25,
+        letterSpacing: 0,
       );
 
-  static TextStyle get _headline2 => GoogleFonts.dmSans(
+  static TextStyle get _headline2 => GoogleFonts.outfit(
         fontSize: 24,
         fontWeight: FontWeight.w700,
         color: AppColors.charcoal,
         height: 1.3,
+        letterSpacing: 0,
       );
 
-  static TextStyle get _headline3 => GoogleFonts.dmSans(
+  static TextStyle get _headline3 => GoogleFonts.outfit(
         fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         color: AppColors.charcoal,
         height: 1.35,
+        letterSpacing: 0,
       );
 
   // Title
-  static TextStyle get _title1 => GoogleFonts.dmSans(
+  static TextStyle get _title1 => GoogleFonts.outfit(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         color: AppColors.charcoal,
         height: 1.4,
+        letterSpacing: 0,
       );
 
-  static TextStyle get _title2 => GoogleFonts.dmSans(
+  static TextStyle get _title2 => GoogleFonts.outfit(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: AppColors.charcoal,
         height: 1.4,
+        letterSpacing: 0,
       );
 
-  static TextStyle get _title3 => GoogleFonts.dmSans(
+  static TextStyle get _title3 => GoogleFonts.outfit(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: AppColors.charcoal,
         height: 1.45,
+        letterSpacing: 0,
       );
 
   // Body
-  static TextStyle get _body1 => GoogleFonts.dmSans(
+  static TextStyle get _body1 => GoogleFonts.outfit(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         color: AppColors.charcoal,
         height: 1.6,
+        letterSpacing: 0,
       );
 
-  static TextStyle get _body2 => GoogleFonts.dmSans(
+  static TextStyle get _body2 => GoogleFonts.outfit(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         color: AppColors.charcoal,
         height: 1.6,
+        letterSpacing: 0,
       );
 
-  static TextStyle get _body3 => GoogleFonts.dmSans(
+  static TextStyle get _body3 => GoogleFonts.outfit(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         color: AppColors.mutedText,
         height: 1.5,
+        letterSpacing: 0,
       );
 
   // Label
-  static TextStyle get _label1 => GoogleFonts.dmSans(
+  static TextStyle get _label1 => GoogleFonts.outfit(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: AppColors.charcoal,
         height: 1.4,
-        letterSpacing: 0.1,
+        letterSpacing: 0,
       );
 
-  static TextStyle get _label2 => GoogleFonts.dmSans(
+  static TextStyle get _label2 => GoogleFonts.outfit(
         fontSize: 12,
         fontWeight: FontWeight.w600,
         color: AppColors.charcoal,
         height: 1.4,
-        letterSpacing: 0.2,
+        letterSpacing: 0,
       );
 
-  static TextStyle get _label3 => GoogleFonts.dmSans(
+  static TextStyle get _label3 => GoogleFonts.outfit(
         fontSize: 10,
         fontWeight: FontWeight.w500,
         color: AppColors.mutedText,
         height: 1.4,
-        letterSpacing: 0.4,
+        letterSpacing: 0,
       );
 
   // Convenience getters
@@ -156,31 +168,32 @@ class AppTypography {
   static TextStyle get labelMd => _label2;
   static TextStyle get labelSm => _label3;
 
-  static TextStyle get caption => GoogleFonts.dmSans(
+  static TextStyle get caption => GoogleFonts.outfit(
         fontSize: 11,
         fontWeight: FontWeight.w400,
         color: AppColors.mutedText,
         height: 1.4,
+        letterSpacing: 0,
       );
 
-  static TextStyle get overline => GoogleFonts.dmSans(
+  static TextStyle get overline => GoogleFonts.outfit(
         fontSize: 10,
         fontWeight: FontWeight.w600,
         color: AppColors.mutedText,
-        letterSpacing: 1.2,
+        letterSpacing: 0,
         height: 1.4,
       );
 
-  static TextStyle get buttonText => GoogleFonts.dmSans(
+  static TextStyle get buttonText => GoogleFonts.outfit(
         fontSize: 15,
         fontWeight: FontWeight.w600,
-        letterSpacing: 0.3,
+        letterSpacing: 0,
         height: 1.2,
       );
 
-  static TextStyle get navLabel => GoogleFonts.dmSans(
+  static TextStyle get navLabel => GoogleFonts.outfit(
         fontSize: 11,
         fontWeight: FontWeight.w500,
-        letterSpacing: 0.2,
+        letterSpacing: 0,
       );
 }

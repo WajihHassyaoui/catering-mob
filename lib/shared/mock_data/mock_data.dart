@@ -218,7 +218,8 @@ class MockData {
         ),
       ],
       status: 'out_for_delivery',
-      deliveryAddress: '150 Tech Park Drive, Suite 400, San Francisco, CA 94105',
+      deliveryAddress:
+          '150 Tech Park Drive, Suite 400, San Francisco, CA 94105',
       deliveryDate: DateTime.now().add(const Duration(hours: 1)),
       deliveryTime: '12:30 PM',
       subtotal: 45.00,
@@ -235,11 +236,13 @@ class MockData {
         ),
         OrderStatusEvent(
           status: 'confirmed',
-          timestamp: DateTime.now().subtract(const Duration(hours: 1, minutes: 45)),
+          timestamp:
+              DateTime.now().subtract(const Duration(hours: 1, minutes: 45)),
         ),
         OrderStatusEvent(
           status: 'preparing',
-          timestamp: DateTime.now().subtract(const Duration(hours: 1, minutes: 15)),
+          timestamp:
+              DateTime.now().subtract(const Duration(hours: 1, minutes: 15)),
         ),
         OrderStatusEvent(
           status: 'out_for_delivery',
@@ -270,7 +273,8 @@ class MockData {
         ),
       ],
       status: 'delivered',
-      deliveryAddress: '150 Tech Park Drive, Suite 400, San Francisco, CA 94105',
+      deliveryAddress:
+          '150 Tech Park Drive, Suite 400, San Francisco, CA 94105',
       deliveryDate: DateTime.now().subtract(const Duration(days: 3)),
       deliveryTime: '1:00 PM',
       subtotal: 34.00,
@@ -287,7 +291,8 @@ class MockData {
         ),
         OrderStatusEvent(
           status: 'confirmed',
-          timestamp: DateTime.now().subtract(const Duration(days: 3, hours: 2, minutes: 45)),
+          timestamp: DateTime.now()
+              .subtract(const Duration(days: 3, hours: 2, minutes: 45)),
         ),
         OrderStatusEvent(
           status: 'delivered',
@@ -349,7 +354,7 @@ class MockData {
             ),
           ],
         ),
-        GroupOrderParticipant(
+        const GroupOrderParticipant(
           id: 'p_3',
           userId: 'u_3',
           userName: 'Marcus Williams',
@@ -404,10 +409,12 @@ class MockData {
       dietaryRestrictions: ['Vegetarian', 'Gluten-Free', 'Halal'],
       serviceType: 'Full-Service Catering',
       budgetRange: '\$5,000 – \$10,000',
-      specialRequests: 'We need branded table setups with our company colors (navy and gold). Please accommodate a separate vegan station.',
+      specialRequests:
+          'We need branded table setups with our company colors (navy and gold). Please accommodate a separate vegan station.',
       status: 'quoted',
       quotedPrice: 8075.00,
-      adminNotes: 'Quoted for 85 guests at \$95/person. Includes branded table setup at no extra charge.',
+      adminNotes:
+          'Quoted for 85 guests at \$95/person. Includes branded table setup at no extra charge.',
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
       respondedAt: DateTime.now().subtract(const Duration(days: 3)),
     ),
@@ -527,7 +534,8 @@ class MockData {
       id: 'notif_1',
       userId: 'u_client_1',
       title: 'Order On Its Way! 🚚',
-      body: 'Your order PLT-2024-0047 is out for delivery. Estimated arrival: 12:30 PM.',
+      body:
+          'Your order PLT-2024-0047 is out for delivery. Estimated arrival: 12:30 PM.',
       type: 'order',
       referenceId: 'ord_1',
       isRead: false,
@@ -537,7 +545,8 @@ class MockData {
       id: 'notif_2',
       userId: 'u_client_1',
       title: 'Group Order Reminder',
-      body: 'Don\'t forget to submit your meal selection for Wednesday Team Lunch. Deadline in 32 hours.',
+      body:
+          'Don\'t forget to submit your meal selection for Wednesday Team Lunch. Deadline in 32 hours.',
       type: 'group_order',
       referenceId: 'go_1',
       isRead: false,
@@ -547,7 +556,8 @@ class MockData {
       id: 'notif_3',
       userId: 'u_client_1',
       title: 'Meal Prep Delivery Tomorrow',
-      body: 'Your weekly lunch plan delivery is scheduled for tomorrow. Check your plan for details.',
+      body:
+          'Your weekly lunch plan delivery is scheduled for tomorrow. Check your plan for details.',
       type: 'meal_prep',
       isRead: true,
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
@@ -556,7 +566,8 @@ class MockData {
       id: 'notif_4',
       userId: 'u_company_1',
       title: 'Catering Quote Ready',
-      body: 'Your corporate catering request for the Product Launch has been quoted at \$8,075.',
+      body:
+          'Your corporate catering request for the Product Launch has been quoted at \$8,075.',
       type: 'catering',
       referenceId: 'cr_1',
       isRead: false,
@@ -566,7 +577,8 @@ class MockData {
       id: 'notif_5',
       userId: 'u_company_1',
       title: 'New Invoice Issued',
-      body: 'Invoice INV-2024-0082 for \$942.70 has been issued. Due in 30 days.',
+      body:
+          'Invoice INV-2024-0082 for \$942.70 has been issued. Due in 30 days.',
       type: 'invoice',
       referenceId: 'inv_1',
       isRead: true,

@@ -51,7 +51,8 @@ class CompanyModel {
         logoUrl: json['logo_url'] as String?,
         description: json['description'] as String?,
         adminUserId: json['admin_user_id'] as String,
-        billingEmail: json['billing_email'] as String? ?? json['email'] as String,
+        billingEmail:
+            json['billing_email'] as String? ?? json['email'] as String,
         taxId: json['tax_id'] as String?,
         createdAt: DateTime.parse(json['created_at'] as String),
         approvedAt: json['approved_at'] != null

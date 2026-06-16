@@ -7,7 +7,8 @@ import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/constants/app_typography.dart';
 import '../../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../../shared/mock_data/mock_data.dart';
-import '../../../../../shared/widgets/meal_card.dart';
+import '../../../../../shared/widgets/app_button.dart';
+import '../../../../../shared/widgets/common_widgets.dart';
 import '../../../../../shared/widgets/status_badge.dart';
 import '../../navigation/company_navigation.dart';
 
@@ -21,27 +22,43 @@ class CompanyDashboardScreen extends ConsumerWidget {
     final cateringRequests = MockData.cateringRequests;
     final invoices = MockData.invoices;
     final unpaidInvoices = invoices.where((i) => !i.isPaid).toList();
+    final user = ref.watch(authProvider).user ?? MockData.companyUser;
 
     return Scaffold(
       backgroundColor: AppColors.creamBackground,
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: _buildHeader(context, ref, company)),
+          SliverToBoxAdapter(
+              child: _Header(company: company, firstName: user.firstName)),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.pagePadding),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pagePadding,
+                AppSpacing.xl,
+                AppSpacing.pagePadding,
+                AppSpacing.huge,
+              ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildMetricsGrid(context, ref, company, groupOrders, unpaidInvoices),
+                  _MetricsGrid(
+                    company: company,
+                    groupOrders: groupOrders,
+                    unpaidInvoices: unpaidInvoices,
+                  ),
                   const SizedBox(height: AppSpacing.sectionSpacing),
-                  _buildQuickActions(context, ref),
+                  _SpendSummary(
+                      company: company, invoicesDue: unpaidInvoices.length),
                   const SizedBox(height: AppSpacing.sectionSpacing),
-                  _buildActiveGroupOrders(context, ref, groupOrders),
+                  _QuickActions(ref: ref, context: context),
                   const SizedBox(height: AppSpacing.sectionSpacing),
-                  _buildRecentCatering(context, ref, cateringRequests),
+                  _ActiveGroupOrders(groupOrders: groupOrders, ref: ref),
                   const SizedBox(height: AppSpacing.sectionSpacing),
-                  _buildInvoiceAlert(context, ref, unpaidInvoices),
-                  const SizedBox(height: AppSpacing.huge),
+                  _CateringSnapshot(requests: cateringRequests, ref: ref),
+                  if (unpaidInvoices.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.sectionSpacing),
+                    _InvoiceAlert(unpaid: unpaidInvoices, ref: ref),
+                  ],
                 ],
               ),
             ),
@@ -50,12 +67,20 @@ class CompanyDashboardScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildHeader(BuildContext context, WidgetRef ref, dynamic company) {
+class _Header extends StatelessWidget {
+  final dynamic company;
+  final String firstName;
+
+  const _Header({required this.company, required this.firstName});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.pagePadding,
-        MediaQuery.of(context).padding.top + 20,
+        MediaQuery.of(context).padding.top + AppSpacing.lg,
         AppSpacing.pagePadding,
         AppSpacing.xxl,
       ),
@@ -66,16 +91,18 @@ class CompanyDashboardScreen extends ConsumerWidget {
           Row(
             children: [
               Container(
-                width: 52,
-                height: 52,
+                width: 54,
+                height: 54,
                 decoration: BoxDecoration(
-                  color: AppColors.white.withAlpha(25),
-                  borderRadius: BorderRadius.circular(14),
+                  color: AppColors.white.withAlpha(34),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppColors.white.withAlpha(48)),
                 ),
                 child: Center(
                   child: Text(
                     company.initials,
-                    style: AppTypography.headingMd.copyWith(color: AppColors.white),
+                    style:
+                        AppTypography.titleLg.copyWith(color: AppColors.white),
                   ),
                 ),
               ),
@@ -87,53 +114,89 @@ class CompanyDashboardScreen extends ConsumerWidget {
                     Text(company.name,
                         style: AppTypography.titleLg
                             .copyWith(color: AppColors.white)),
-                    Row(
-                      children: [
-                        StatusBadge.fromStatus(company.status,
-                            size: BadgeSize.small),
-                        const SizedBox(width: 8),
-                        Text(company.industry,
-                            style: AppTypography.bodySm
-                                .copyWith(color: AppColors.white.withAlpha(180))),
-                      ],
+                    Text(
+                      '${company.industry} - ${company.size}',
+                      style: AppTypography.bodySm
+                          .copyWith(color: AppColors.white.withAlpha(190)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.notifications_outlined,
-                    color: AppColors.white),
-              ),
+              StatusBadge.fromStatus(company.status, size: BadgeSize.small),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xxl),
           Text(
-            'Good ${_greeting()}, ${ref.watch(authProvider).user?.firstName ?? 'there'} 👋',
+            'Good ${_greeting()}, $firstName',
             style: AppTypography.bodyMd
-                .copyWith(color: AppColors.white.withAlpha(200)),
+                .copyWith(color: AppColors.white.withAlpha(205)),
           ),
+          const SizedBox(height: 4),
           Text(
-            'Here\'s your company overview',
-            style: AppTypography.headingSm.copyWith(color: AppColors.white),
+            'Your catering operations dashboard',
+            style: AppTypography.displayMedium.copyWith(
+              color: AppColors.white,
+              fontSize: 34,
+              height: 1.08,
+            ),
           ),
         ],
       ),
-    ).animate().fade(duration: 400.ms);
+    ).animate().fade(duration: 300.ms).slideY(begin: -0.03, end: 0);
   }
 
-  Widget _buildMetricsGrid(BuildContext context, WidgetRef ref,
-      dynamic company, List groupOrders, List unpaidInvoices) {
+  String _greeting() {
+    final h = DateTime.now().hour;
+    if (h < 12) return 'morning';
+    if (h < 17) return 'afternoon';
+    return 'evening';
+  }
+}
+
+class _MetricsGrid extends StatelessWidget {
+  final dynamic company;
+  final List<dynamic> groupOrders;
+  final List<dynamic> unpaidInvoices;
+
+  const _MetricsGrid({
+    required this.company,
+    required this.groupOrders,
+    required this.unpaidInvoices,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final metrics = [
-      (Icons.people_rounded, '${company.memberCount}', 'Employees',
-          AppColors.oliveGreen),
-      (Icons.group_rounded, '${groupOrders.length}', 'Group Orders',
-          AppColors.sageGreen),
-      (Icons.attach_money_rounded,
-          '\$${(company.monthlySpend / 1000).toStringAsFixed(1)}k',
-          'Monthly Spend', AppColors.terracotta),
-      (Icons.receipt_outlined, '${unpaidInvoices.length}', 'Unpaid Invoices',
-          AppColors.warmGold),
+      DashboardStatCard(
+        icon: Icons.payments_outlined,
+        value: '\$${(company.monthlySpend / 1000).toStringAsFixed(1)}k',
+        title: 'Monthly spend',
+        color: AppColors.terracotta,
+        subtitle: 'Within forecast',
+        progress: 0.68,
+      ),
+      DashboardStatCard(
+        icon: Icons.people_rounded,
+        value: '${company.memberCount}',
+        title: 'Active employees',
+        color: AppColors.oliveGreen,
+        subtitle: '8 departments',
+        progress: 0.78,
+      ),
+      DashboardStatCard(
+        icon: Icons.group_rounded,
+        value: '${groupOrders.length}',
+        title: 'Group orders',
+        color: AppColors.sageGreen,
+      ),
+      DashboardStatCard(
+        icon: Icons.receipt_long_outlined,
+        value: '${unpaidInvoices.length}',
+        title: 'Pending invoices',
+        color: AppColors.warmGold,
+      ),
     ];
 
     return GridView.builder(
@@ -141,237 +204,365 @@ class CompanyDashboardScreen extends ConsumerWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.5,
+        crossAxisSpacing: AppSpacing.md,
+        mainAxisSpacing: AppSpacing.md,
+        childAspectRatio: 1.12,
       ),
       itemCount: metrics.length,
-      itemBuilder: (_, i) {
-        final (icon, value, label, color) = metrics[i];
-        return MetricCard(
-          icon: icon,
-          value: value,
-          title: label,
-          color: color,
-        );
-      },
+      itemBuilder: (_, i) => metrics[i],
     );
   }
+}
 
-  Widget _buildQuickActions(BuildContext context, WidgetRef ref) {
+class _SpendSummary extends StatelessWidget {
+  final dynamic company;
+  final int invoicesDue;
+
+  const _SpendSummary({required this.company, required this.invoicesDue});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.warmIvory,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: AppColors.white.withAlpha(180)),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.ambientShadow,
+            blurRadius: 24,
+            offset: Offset(0, 14),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                  child: Text('Budget pulse', style: AppTypography.titleLg)),
+              const InfoPill(
+                  icon: Icons.trending_up_rounded,
+                  label: 'Healthy',
+                  color: AppColors.successGreen),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(100),
+            child: const LinearProgressIndicator(
+              minHeight: 10,
+              value: 0.68,
+              color: AppColors.terracotta,
+              backgroundColor: AppColors.terracottaLight,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('\$${company.monthlySpend.toStringAsFixed(0)} used',
+                  style: AppTypography.bodySm),
+              Text('$invoicesDue invoice${invoicesDue == 1 ? '' : 's'} pending',
+                  style: AppTypography.bodySm
+                      .copyWith(color: AppColors.mutedText)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActions extends StatelessWidget {
+  final WidgetRef ref;
+  final BuildContext context;
+
+  const _QuickActions({required this.ref, required this.context});
+
+  @override
+  Widget build(BuildContext context) {
     final actions = [
-      (Icons.group_add_rounded, 'Group Order', AppColors.oliveGreen,
+      _Action(
+          Icons.group_add_rounded,
+          'Create group order',
+          AppColors.oliveGreen,
           () => ref.read(companyNavIndexProvider.notifier).state = 2),
-      (Icons.event_available_rounded, 'Catering', AppColors.terracotta,
+      _Action(
+          Icons.event_available_rounded,
+          'Book catering',
+          AppColors.terracotta,
           () => ref.read(companyNavIndexProvider.notifier).state = 3),
-      (Icons.person_add_outlined, 'Invite Staff', AppColors.sageGreen,
-          () => context.push('/company/members/invite')),
-      (Icons.restaurant_menu_rounded, 'Meal Plan', AppColors.warmGold,
-          () => context.push('/company/meal-prep')),
+      _Action(Icons.person_add_outlined, 'Invite member', AppColors.sageGreen,
+          () => this.context.push('/company/members/invite')),
+      _Action(Icons.receipt_long_outlined, 'View invoices', AppColors.warmGold,
+          () => ref.read(companyNavIndexProvider.notifier).state = 4),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Quick Actions', style: AppTypography.titleLg),
+        const SectionHeader(
+          title: 'Fast actions',
+          subtitle: 'The admin tasks your week tends to need.',
+        ),
         const SizedBox(height: AppSpacing.md),
-        Row(
-          children: actions
-              .asMap()
-              .entries
-              .map((e) => Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                          right: e.key < actions.length - 1 ? 10 : 0),
-                      child: GestureDetector(
-                        onTap: e.value.$4,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          decoration: BoxDecoration(
-                            color: e.value.$3.withAlpha(20),
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.card),
-                            border: Border.all(
-                                color: e.value.$3.withAlpha(50)),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(e.value.$1,
-                                  color: e.value.$3, size: 24),
-                              const SizedBox(height: 6),
-                              Text(
-                                e.value.$2,
-                                style: AppTypography.caption.copyWith(
-                                    color: AppColors.charcoal,
-                                    fontWeight: FontWeight.w500),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: AppSpacing.md,
+            mainAxisSpacing: AppSpacing.md,
+            childAspectRatio: 1.8,
+          ),
+          itemCount: actions.length,
+          itemBuilder: (_, i) {
+            final action = actions[i];
+            return GestureDetector(
+              onTap: action.onTap,
+              child: Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: action.color.withAlpha(18),
+                  borderRadius: BorderRadius.circular(AppRadius.card),
+                  border: Border.all(color: action.color.withAlpha(34)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: action.color.withAlpha(28),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(action.icon, color: action.color, size: 20),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        action.label,
+                        style: AppTypography.titleSm,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  ))
-              .toList(),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ],
-    ).animate().fade(delay: 200.ms, duration: 300.ms);
+    );
   }
+}
 
-  Widget _buildActiveGroupOrders(BuildContext context, WidgetRef ref, List groupOrders) {
+class _ActiveGroupOrders extends StatelessWidget {
+  final List<dynamic> groupOrders;
+  final WidgetRef ref;
+
+  const _ActiveGroupOrders({required this.groupOrders, required this.ref});
+
+  @override
+  Widget build(BuildContext context) {
     if (groupOrders.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Active Group Orders', style: AppTypography.titleLg),
-            TextButton(
-              onPressed: () =>
-                  ref.read(companyNavIndexProvider.notifier).state = 2,
-              child: Text('See All',
-                  style: AppTypography.labelMd
-                      .copyWith(color: AppColors.oliveGreen)),
-            ),
-          ],
+        SectionHeader(
+          title: 'Active group orders',
+          subtitle: 'Participant progress and deadlines.',
+          actionLabel: 'Manage',
+          onAction: () => ref.read(companyNavIndexProvider.notifier).state = 2,
         ),
         const SizedBox(height: AppSpacing.md),
-        ...groupOrders.take(2).map((go) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: GestureDetector(
-                onTap: () => context.push('/company/group-orders/${go.id}'),
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.cardPadding),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(AppRadius.card),
-                    border: Border.all(color: AppColors.lightBorder),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 44, height: 44,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                        ),
-                        child: const Icon(Icons.group_rounded,
-                            color: AppColors.white, size: 22),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(go.name, style: AppTypography.titleSm),
-                            Text(
-                              '${go.participantCount} participants · ${go.deadlineCountdown}',
-                              style: AppTypography.bodySm,
-                            ),
-                          ],
-                        ),
-                      ),
+        ...groupOrders.take(2).map(
+              (go) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: _DashboardListCard(
+                  icon: Icons.groups_rounded,
+                  color: AppColors.oliveGreen,
+                  title: go.name,
+                  subtitle:
+                      '${go.participantCount} participants - ${go.deadlineCountdown}',
+                  badge:
                       StatusBadge.fromStatus(go.status, size: BadgeSize.small),
-                    ],
-                  ),
+                  onTap: () => context.push('/company/group-orders/${go.id}'),
                 ),
               ),
-            )),
+            ),
       ],
-    ).animate().fade(delay: 300.ms, duration: 300.ms);
+    );
   }
+}
 
-  Widget _buildRecentCatering(BuildContext context, WidgetRef ref, List requests) {
+class _CateringSnapshot extends StatelessWidget {
+  final List<dynamic> requests;
+  final WidgetRef ref;
+
+  const _CateringSnapshot({required this.requests, required this.ref});
+
+  @override
+  Widget build(BuildContext context) {
     if (requests.isEmpty) return const SizedBox.shrink();
     final req = requests.first;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Recent Catering Request', style: AppTypography.titleLg),
+        SectionHeader(
+          title: 'Catering pipeline',
+          subtitle: 'Upcoming event requests and quotes.',
+          actionLabel: 'Open',
+          onAction: () => ref.read(companyNavIndexProvider.notifier).state = 3,
+        ),
         const SizedBox(height: AppSpacing.md),
-        GestureDetector(
+        _DashboardListCard(
+          icon: Icons.event_available_rounded,
+          color: AppColors.terracotta,
+          title: req.eventType,
+          subtitle: '${req.numberOfGuests} guests - ${req.serviceType}',
+          badge: StatusBadge.fromStatus(req.status, size: BadgeSize.small),
           onTap: () => context.push('/company/catering/${req.id}'),
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.cardPadding),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(AppRadius.card),
-              border: Border.all(color: AppColors.lightBorder),
-            ),
-            child: Row(
+        ),
+      ],
+    );
+  }
+}
+
+class _InvoiceAlert extends StatelessWidget {
+  final List<dynamic> unpaid;
+  final WidgetRef ref;
+
+  const _InvoiceAlert({required this.unpaid, required this.ref});
+
+  @override
+  Widget build(BuildContext context) {
+    final total = unpaid.fold<double>(0, (sum, invoice) => sum + invoice.total);
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        gradient: AppColors.warmGradient,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.terracotta.withAlpha(44),
+            blurRadius: 24,
+            offset: const Offset(0, 14),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.receipt_long_rounded,
+              color: AppColors.white, size: 30),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 44, height: 44,
-                  decoration: BoxDecoration(
-                    color: AppColors.terracottaLight,
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                  ),
-                  child: const Icon(Icons.event_outlined,
-                      color: AppColors.terracotta, size: 22),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(req.eventType, style: AppTypography.titleSm),
-                      Text(
-                        req.numberOfGuests.toString() + ' guests · ' + req.serviceType,
-                        style: AppTypography.bodySm,
-                      ),
-                    ],
-                  ),
-                ),
-                StatusBadge.fromStatus(req.status, size: BadgeSize.small),
+                Text('\$${total.toStringAsFixed(2)} due',
+                    style: AppTypography.headingSm
+                        .copyWith(color: AppColors.white)),
+                Text(
+                    '${unpaid.length} invoice${unpaid.length == 1 ? '' : 's'} need review',
+                    style: AppTypography.bodySm
+                        .copyWith(color: AppColors.white.withAlpha(205))),
               ],
             ),
           ),
-        ),
-      ],
-    ).animate().fade(delay: 350.ms, duration: 300.ms);
+          AppButton(
+            label: 'Review',
+            fullWidth: false,
+            variant: AppButtonVariant.ghost,
+            onPressed: () =>
+                ref.read(companyNavIndexProvider.notifier).state = 4,
+          ),
+        ],
+      ),
+    );
   }
+}
 
-  Widget _buildInvoiceAlert(BuildContext context, WidgetRef ref, List unpaid) {
-    if (unpaid.isEmpty) return const SizedBox.shrink();
+class _DashboardListCard extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final Widget badge;
+  final VoidCallback onTap;
+
+  const _DashboardListCard({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.badge,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => ref.read(companyNavIndexProvider.notifier).state = 4,
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.cardPadding),
         decoration: BoxDecoration(
-          color: AppColors.goldLight,
+          color: AppColors.warmIvory,
           borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(color: AppColors.warmGold.withAlpha(80)),
+          border: Border.all(color: AppColors.white.withAlpha(180)),
+          boxShadow: const [
+            BoxShadow(
+              color: AppColors.ambientShadow,
+              blurRadius: 20,
+              offset: Offset(0, 12),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            const Icon(Icons.receipt_outlined, color: AppColors.warmGold, size: 24),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: color.withAlpha(24),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: color),
+            ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '${unpaid.length} unpaid invoice${unpaid.length > 1 ? 's' : ''}',
-                    style: AppTypography.titleSm.copyWith(color: AppColors.warmGold),
-                  ),
-                  Text('Tap to view and pay outstanding invoices.',
-                      style: AppTypography.bodySm),
+                  Text(title,
+                      style: AppTypography.titleSm,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                  Text(subtitle,
+                      style: AppTypography.bodySm
+                          .copyWith(color: AppColors.mutedText),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded,
-                size: 14, color: AppColors.warmGold),
+            badge,
           ],
         ),
       ),
-    ).animate().fade(delay: 450.ms, duration: 300.ms);
+    );
   }
+}
 
-  String _greeting() {
-    final h = DateTime.now().hour;
-    if (h < 12) return 'Morning';
-    if (h < 17) return 'Afternoon';
-    return 'Evening';
-  }
+class _Action {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _Action(this.icon, this.label, this.color, this.onTap);
 }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
 import '../../shared/models/meal_model.dart';
+import 'app_button.dart';
+import 'common_widgets.dart';
 
 class MealCard extends StatefulWidget {
   final MealModel meal;
@@ -30,6 +31,7 @@ class MealCard extends StatefulWidget {
 class _MealCardState extends State<MealCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _heartCtrl;
+  bool _pressed = false;
 
   @override
   void initState() {
@@ -53,56 +55,161 @@ class _MealCardState extends State<MealCard>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.compact) return _buildCompact();
-    return _buildFull();
-  }
-
-  Widget _buildFull() {
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(color: AppColors.lightBorder),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.cardShadow,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildImage(),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.cardPadding),
-              child: _buildInfo(),
-            ),
-          ],
-        ),
+    return AnimatedScale(
+      scale: _pressed ? 0.99 : 1,
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOutCubic,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        onTapDown: widget.onTap == null
+            ? null
+            : (_) => setState(() => _pressed = true),
+        onTapUp: widget.onTap == null
+            ? null
+            : (_) => setState(() => _pressed = false),
+        onTapCancel: widget.onTap == null
+            ? null
+            : () => setState(() => _pressed = false),
+        child: widget.compact ? _buildCompact() : _buildFull(),
       ),
     );
   }
 
-  Widget _buildImage() {
+  Widget _buildFull() {
+    return Container(
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: _buildImage(height: 154),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.cardPadding,
+              0,
+              AppSpacing.cardPadding,
+              AppSpacing.cardPadding,
+            ),
+            child: _buildInfo(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompact() {
+    return Container(
+      width: 188,
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(9),
+            child: _buildImage(height: 112, compact: true),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.meal.name,
+                  style: AppTypography.titleSm,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      widget.meal.formattedPrice,
+                      style: AppTypography.labelMd
+                          .copyWith(color: AppColors.terracotta),
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.star_rounded,
+                        size: 14, color: AppColors.warmGold),
+                    const SizedBox(width: 2),
+                    Text(
+                      widget.meal.rating.toStringAsFixed(1),
+                      style: AppTypography.caption
+                          .copyWith(color: AppColors.charcoal),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  BoxDecoration _cardDecoration() {
+    return BoxDecoration(
+      gradient: AppColors.cardGradient,
+      borderRadius: BorderRadius.circular(AppRadius.card),
+      border: Border.all(color: AppColors.white.withAlpha(180)),
+      boxShadow: const [
+        BoxShadow(
+          color: AppColors.ambientShadow,
+          blurRadius: 22,
+          offset: Offset(0, 12),
+        ),
+        BoxShadow(
+          color: AppColors.cardShadow,
+          blurRadius: 20,
+          offset: Offset(0, 8),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImage({required double height, bool compact = false}) {
     return Stack(
       children: [
-        ClipRRect(
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppRadius.card),
+        PremiumImage(
+          imageUrl: widget.meal.imageUrl,
+          height: height,
+          borderRadius: BorderRadius.circular(AppRadius.image),
+        ),
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.image),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  AppColors.overlayDark.withAlpha(compact ? 40 : 72),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
           ),
-          child: widget.meal.imageUrl != null
-              ? Image.network(
-                  widget.meal.imageUrl!,
-                  height: 160,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => _imagePlaceholder(),
-                )
-              : _imagePlaceholder(),
+        ),
+        if (widget.meal.isFeatured)
+          Positioned(
+            top: 10,
+            left: 10,
+            child: _floatingBadge(
+              icon: Icons.auto_awesome_rounded,
+              label: 'Chef pick',
+              color: AppColors.warmGold,
+            ),
+          ),
+        Positioned(
+          right: 10,
+          bottom: 10,
+          child: _floatingBadge(
+            icon: Icons.payments_outlined,
+            label: widget.meal.formattedPrice,
+            color: AppColors.white,
+            textColor: AppColors.charcoal,
+          ),
         ),
         if (widget.onToggleFavorite != null)
           Positioned(
@@ -113,12 +220,20 @@ class _MealCardState extends State<MealCard>
               child: AnimatedBuilder(
                 animation: _heartCtrl,
                 builder: (_, __) => Transform.scale(
-                  scale: 1.0 + _heartCtrl.value * 0.3,
+                  scale: 1.0 + _heartCtrl.value * 0.28,
                   child: Container(
-                    padding: const EdgeInsets.all(6),
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
                       color: AppColors.white.withAlpha(230),
                       shape: BoxShape.circle,
+                      boxShadow: const [
+                        BoxShadow(
+                          color: AppColors.cardShadow,
+                          blurRadius: 12,
+                          offset: Offset(0, 6),
+                        ),
+                      ],
                     ),
                     child: Icon(
                       widget.isFavorite
@@ -127,33 +242,10 @@ class _MealCardState extends State<MealCard>
                       size: 18,
                       color: widget.isFavorite
                           ? AppColors.terracotta
-                          : AppColors.mutedText,
+                          : AppColors.charcoal,
                     ),
                   ),
                 ),
-              ),
-            ),
-          ),
-        if (widget.meal.isFeatured)
-          Positioned(
-            top: 10,
-            left: 10,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.warmGold,
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.star_rounded,
-                      size: 11, color: AppColors.white),
-                  const SizedBox(width: 3),
-                  Text('Featured',
-                      style: AppTypography.labelSm
-                          .copyWith(color: AppColors.white)),
-                ],
               ),
             ),
           ),
@@ -175,177 +267,142 @@ class _MealCardState extends State<MealCard>
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              widget.meal.formattedPrice,
-              style: AppTypography.titleMd
-                  .copyWith(color: AppColors.terracotta),
-            ),
+            const SizedBox(width: AppSpacing.sm),
+            if (widget.meal.rating > 0) _rating(),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Text(
           widget.meal.description,
-          style: AppTypography.bodySm,
+          style: AppTypography.bodySm.copyWith(color: AppColors.mutedText),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: AppSpacing.md),
-        Row(
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
           children: [
-            _metaChip(Icons.local_fire_department_rounded,
-                '${widget.meal.calories} cal', AppColors.terracotta),
-            const SizedBox(width: 8),
-            _metaChip(Icons.schedule_outlined, widget.meal.prepTime,
-                AppColors.mutedText),
-            const Spacer(),
-            if (widget.meal.rating > 0) ...[
-              const Icon(Icons.star_rounded,
-                  size: 14, color: AppColors.warmGold),
-              const SizedBox(width: 3),
-              Text(
-                widget.meal.rating.toStringAsFixed(1),
-                style: AppTypography.labelMd
-                    .copyWith(color: AppColors.charcoal),
-              ),
-              const SizedBox(width: 2),
-              Text(
-                '(${widget.meal.reviewCount})',
-                style: AppTypography.bodySm,
-              ),
-            ],
+            InfoPill(
+              icon: Icons.local_fire_department_rounded,
+              label: '${widget.meal.calories} cal',
+              color: AppColors.terracotta,
+            ),
+            InfoPill(
+              icon: Icons.bolt_rounded,
+              label: _proteinLabel,
+              color: AppColors.oliveGreen,
+            ),
+            InfoPill(
+              icon: Icons.schedule_rounded,
+              label: widget.meal.prepTime,
+              color: AppColors.mutedText,
+            ),
           ],
         ),
         if (widget.meal.dietaryTags.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: 6,
-            runSpacing: 4,
-            children: widget.meal.dietaryTags
-                .take(3)
-                .map((tag) => _dietaryTag(tag))
-                .toList(),
+            runSpacing: 6,
+            children: widget.meal.dietaryTags.take(3).map(_dietaryTag).toList(),
           ),
         ],
         if (widget.onAddToCart != null) ...[
           const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            width: double.infinity,
-            height: 40,
-            child: ElevatedButton.icon(
-              onPressed: widget.onAddToCart,
-              icon: const Icon(Icons.add_shopping_cart_rounded, size: 16),
-              label: const Text('Add to Cart'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.oliveGreen,
-                foregroundColor: AppColors.white,
-                textStyle: AppTypography.labelMd,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.button),
-                ),
-              ),
-            ),
+          AppButton(
+            label: 'Add to order',
+            onPressed: widget.onAddToCart,
+            icon: Icons.add_rounded,
+            size: AppButtonSize.small,
           ),
         ],
       ],
     );
   }
 
-  Widget _buildCompact() {
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Container(
-        width: 180,
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(color: AppColors.lightBorder),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.cardShadow,
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+  Widget _floatingBadge({
+    required IconData icon,
+    required String label,
+    required Color color,
+    Color? textColor,
+  }) {
+    final foreground = textColor ?? AppColors.white;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color: color == AppColors.white
+            ? AppColors.white.withAlpha(228)
+            : color.withAlpha(230),
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: AppColors.white.withAlpha(90)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: foreground),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: AppTypography.caption.copyWith(
+              color: foreground,
+              fontWeight: FontWeight.w700,
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(AppRadius.card),
-              ),
-              child: widget.meal.imageUrl != null
-                  ? Image.network(
-                      widget.meal.imageUrl!,
-                      height: 110,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _imagePlaceholder(110),
-                    )
-                  : _imagePlaceholder(110),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.meal.name,
-                    style: AppTypography.titleSm,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    widget.meal.formattedPrice,
-                    style: AppTypography.labelMd
-                        .copyWith(color: AppColors.terracotta),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _imagePlaceholder([double height = 160]) {
+  Widget _rating() {
     return Container(
-      height: height,
-      width: double.infinity,
-      color: AppColors.softBeige,
-      child: const Icon(Icons.restaurant_rounded,
-          size: 40, color: AppColors.lightBorder),
-    );
-  }
-
-  Widget _metaChip(IconData icon, String label, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 13, color: color),
-        const SizedBox(width: 3),
-        Text(label,
-            style: AppTypography.bodySm.copyWith(color: AppColors.mutedText)),
-      ],
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.goldLight,
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.star_rounded, size: 14, color: AppColors.warmGold),
+          const SizedBox(width: 3),
+          Text(
+            widget.meal.rating.toStringAsFixed(1),
+            style: AppTypography.caption.copyWith(
+              color: AppColors.charcoal,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _dietaryTag(String tag) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         color: AppColors.oliveLight,
         borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: AppColors.oliveGreen.withAlpha(24)),
       ),
       child: Text(
         tag,
-        style: AppTypography.labelSm.copyWith(color: AppColors.oliveGreen),
+        style: AppTypography.caption.copyWith(
+          color: AppColors.oliveGreen,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
+  }
+
+  String get _proteinLabel {
+    if (widget.meal.dietaryTags.contains('High Protein')) return 'Protein rich';
+    if (widget.meal.dietaryTags.contains('Vegan')) return 'Plant based';
+    if (widget.meal.dietaryTags.contains('Vegetarian')) return 'Vegetarian';
+    return widget.meal.allergens.isEmpty
+        ? 'Allergen clear'
+        : '${widget.meal.allergens.length} allergens';
   }
 }
 
@@ -369,58 +426,14 @@ class MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return DashboardStatCard(
+      title: title,
+      value: value,
+      icon: icon,
+      color: color,
+      subtitle: subtitle,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.cardPadding),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(color: AppColors.lightBorder),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.cardShadow,
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withAlpha(30),
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                  ),
-                  child: Icon(icon, size: 20, color: color),
-                ),
-                if (onTap != null)
-                  Icon(Icons.arrow_forward_ios_rounded,
-                      size: 14, color: AppColors.mutedText),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(value,
-                style: AppTypography.headingMd
-                    .copyWith(color: AppColors.charcoal)),
-            const SizedBox(height: 2),
-            Text(title,
-                style:
-                    AppTypography.bodySm.copyWith(color: AppColors.mutedText)),
-            if (subtitle != null) ...[
-              const SizedBox(height: 4),
-              Text(subtitle!,
-                  style: AppTypography.caption
-                      .copyWith(color: AppColors.successGreen)),
-            ],
-          ],
-        ),
-      ),
-    ).animate().fade(duration: 300.ms).slideY(begin: 0.1, end: 0);
+      progress: subtitle == null ? 0 : 0.72,
+    );
   }
 }

@@ -6,6 +6,10 @@ import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/constants/app_typography.dart';
 import '../../../../../shared/mock_data/mock_data.dart';
 import '../../../../../shared/models/catering_request_model.dart';
+import '../../../../../shared/widgets/app_button.dart';
+import '../../../../../shared/widgets/app_text_field.dart';
+import '../../../../../shared/widgets/common_widgets.dart';
+import '../../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../../shared/widgets/status_badge.dart';
 
 class AdminCateringScreen extends ConsumerWidget {
@@ -14,24 +18,153 @@ class AdminCateringScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final requests = MockData.cateringRequests;
+    final pending = requests
+        .where((request) => request.isPending || request.isQuoted)
+        .length;
 
     return Scaffold(
       backgroundColor: AppColors.creamBackground,
-      appBar: AppBar(
-        title: const Text('Catering Requests'),
-        backgroundColor: AppColors.creamBackground,
-        actions: [
-          IconButton(icon: const Icon(Icons.filter_list_rounded), onPressed: () {}),
-        ],
+      body: SafeArea(
+        child: requests.isEmpty
+            ? const EmptyStateWidget(
+                icon: Icons.event_outlined,
+                title: 'No catering requests',
+                message: 'Quote requests will appear here.',
+              )
+            : ListView(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.pagePadding,
+                  AppSpacing.xl,
+                  AppSpacing.pagePadding,
+                  AppSpacing.huge,
+                ),
+                children: [
+                  Text('Quoting desk',
+                      style:
+                          AppTypography.displayMedium.copyWith(fontSize: 34)),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    '$pending quote${pending == 1 ? '' : 's'} open for operations review.',
+                    style: AppTypography.bodyMd
+                        .copyWith(color: AppColors.mutedText),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  _QuoteBuilder(onTap: () => _showQuoteBuilder(context)),
+                  const SizedBox(height: AppSpacing.sectionSpacing),
+                  const SectionHeader(
+                    title: 'Event requests',
+                    subtitle:
+                        'Budget, guest count, dietary needs, and quote state.',
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  ...requests.asMap().entries.map(
+                        (entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                          child: _AdminCateringCard(
+                            request: entry.value,
+                            index: entry.key,
+                            onQuote: () =>
+                                _showQuoteBuilder(context, entry.value),
+                          ),
+                        ),
+                      ),
+                ],
+              ),
       ),
-      body: requests.isEmpty
-          ? const Center(child: Text('No catering requests'))
-          : ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.pagePadding),
-              itemCount: requests.length,
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-              itemBuilder: (_, i) => _AdminCateringCard(request: requests[i], index: i),
+    );
+  }
+
+  void _showQuoteBuilder(BuildContext context, [CateringRequest? request]) {
+    AppBottomSheet.show(
+      context,
+      title: 'Quote builder',
+      isScrollControlled: true,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.pagePadding,
+          0,
+          AppSpacing.pagePadding,
+          AppSpacing.xl,
+        ),
+        child: Column(
+          children: [
+            AppTextField(
+              label: 'Base price',
+              hint: request?.quotedPrice?.toStringAsFixed(0) ?? '8075',
+              prefixIcon: Icons.payments_outlined,
+              keyboardType: TextInputType.number,
             ),
+            const SizedBox(height: AppSpacing.md),
+            const AppTextArea(
+              label: 'Operations notes',
+              hint: 'Menu, service staffing, dietary handling...',
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            AppButton(
+              label: 'Send quote',
+              icon: Icons.send_outlined,
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuoteBuilder extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _QuoteBuilder({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.cardPadding),
+        decoration: BoxDecoration(
+          gradient: AppColors.warmGradient,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.terracotta.withAlpha(48),
+              blurRadius: 26,
+              offset: const Offset(0, 14),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.white.withAlpha(30),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(Icons.request_quote_rounded,
+                  color: AppColors.white),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Build a polished quote',
+                      style: AppTypography.titleLg
+                          .copyWith(color: AppColors.white)),
+                  Text(
+                    'Combine guest count, service model, staffing, and dietary requirements.',
+                    style: AppTypography.bodySm
+                        .copyWith(color: AppColors.white.withAlpha(205)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -39,17 +172,29 @@ class AdminCateringScreen extends ConsumerWidget {
 class _AdminCateringCard extends StatelessWidget {
   final CateringRequest request;
   final int index;
-  const _AdminCateringCard({required this.request, required this.index});
+  final VoidCallback onQuote;
+
+  const _AdminCateringCard({
+    required this.request,
+    required this.index,
+    required this.onQuote,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.warmIvory,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.lightBorder),
-        boxShadow: [BoxShadow(color: AppColors.cardShadow, blurRadius: 6, offset: const Offset(0, 2))],
+        border: Border.all(color: AppColors.white.withAlpha(180)),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.ambientShadow,
+            blurRadius: 22,
+            offset: Offset(0, 12),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,84 +202,105 @@ class _AdminCateringCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 44, height: 44,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
                   color: AppColors.terracottaLight,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  borderRadius: BorderRadius.circular(18),
                 ),
-                child: const Icon(Icons.event_outlined, color: AppColors.terracotta, size: 22),
+                child: const Icon(Icons.event_available_rounded,
+                    color: AppColors.terracotta),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(request.eventType, style: AppTypography.titleSm),
-                    Text(request.companyName ?? request.contactPerson,
-                        style: AppTypography.bodySm.copyWith(color: AppColors.mutedText)),
+                    Text(request.eventType, style: AppTypography.titleMd),
+                    Text(
+                      request.companyName ?? request.contactPerson,
+                      style: AppTypography.bodySm
+                          .copyWith(color: AppColors.mutedText),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
-              StatusBadge.fromStatus(request.status),
+              StatusBadge.fromStatus(request.status, size: BadgeSize.small),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          const Divider(color: AppColors.lightBorder, height: 1),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              InfoPill(
+                  icon: Icons.people_outline_rounded,
+                  label: '${request.numberOfGuests} guests'),
+              InfoPill(
+                  icon: Icons.payments_outlined,
+                  label: request.budgetRange,
+                  color: AppColors.warmGold),
+              InfoPill(
+                  icon: Icons.room_service_outlined,
+                  label: request.serviceType,
+                  color: AppColors.terracotta),
+            ],
+          ),
+          if (request.dietaryRestrictions.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text('Dietary needs', style: AppTypography.caption),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: request.dietaryRestrictions.map(
+                (diet) {
+                  return Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.oliveLight,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Text(
+                      diet,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.oliveGreen,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  );
+                },
+              ).toList(),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
-              _chip(Icons.people_outline_rounded, '${request.numberOfGuests} guests'),
-              const SizedBox(width: AppSpacing.md),
-              _chip(Icons.attach_money_rounded, request.budgetRange),
-              const Spacer(),
-              if (request.isPending)
-                Row(children: [
-                  _actionBtn('Quote', AppColors.oliveGreen),
-                  const SizedBox(width: 8),
-                  _actionBtn('Decline', AppColors.errorRed, outlined: true),
-                ]),
-              if (request.quotedPrice != null)
-                Text('\$${request.quotedPrice!.toStringAsFixed(0)}',
-                    style: AppTypography.titleSm.copyWith(color: AppColors.terracotta)),
+              Expanded(
+                child: Text(
+                  request.quotedPrice == null
+                      ? 'No quote sent yet'
+                      : 'Quoted at \$${request.quotedPrice!.toStringAsFixed(0)}',
+                  style: AppTypography.titleSm
+                      .copyWith(color: AppColors.terracotta),
+                ),
+              ),
+              AppButton(
+                label: request.quotedPrice == null ? 'Quote' : 'Revise',
+                icon: Icons.request_quote_outlined,
+                fullWidth: false,
+                size: AppButtonSize.small,
+                onPressed: onQuote,
+              ),
             ],
           ),
         ],
       ),
-    ).animate().fade(delay: Duration(milliseconds: index * 80), duration: 300.ms);
-  }
-
-  Widget _chip(IconData icon, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 13, color: AppColors.mutedText),
-        const SizedBox(width: 4),
-        Text(text, style: AppTypography.bodySm.copyWith(color: AppColors.mutedText)),
-      ],
-    );
-  }
-
-  Widget _actionBtn(String label, Color color, {bool outlined = false}) {
-    return outlined
-        ? OutlinedButton(
-            onPressed: () {},
-            style: OutlinedButton.styleFrom(
-              foregroundColor: color, side: BorderSide(color: color),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              minimumSize: Size.zero,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button)),
-            ),
-            child: Text(label, style: AppTypography.labelSm),
-          )
-        : ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: color, foregroundColor: AppColors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              minimumSize: Size.zero,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button)),
-            ),
-            child: Text(label, style: AppTypography.labelSm),
-          );
+    )
+        .animate()
+        .fade(delay: Duration(milliseconds: index * 80), duration: 260.ms);
   }
 }

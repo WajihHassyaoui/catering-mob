@@ -12,7 +12,10 @@ class AppTheme {
         useMaterial3: true,
         colorScheme: _colorScheme,
         scaffoldBackgroundColor: AppColors.creamBackground,
+        canvasColor: AppColors.creamBackground,
         textTheme: AppTypography.textTheme,
+        visualDensity: VisualDensity.standard,
+        splashFactory: InkSparkle.splashFactory,
         appBarTheme: _appBarTheme,
         elevatedButtonTheme: _elevatedButtonTheme,
         outlinedButtonTheme: _outlinedButtonTheme,
@@ -27,6 +30,15 @@ class AppTheme {
         bottomSheetTheme: _bottomSheetTheme,
         floatingActionButtonTheme: _fabTheme,
         navigationBarTheme: _navigationBarTheme,
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+            TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+          },
+        ),
       );
 
   static ColorScheme get _colorScheme => const ColorScheme(
@@ -47,7 +59,7 @@ class AppTheme {
         onError: AppColors.white,
         errorContainer: Color(0xFFFBE9E7),
         onErrorContainer: AppColors.errorRed,
-        surface: AppColors.creamBackground,
+        surface: AppColors.warmIvory,
         onSurface: AppColors.charcoal,
         surfaceContainerHighest: AppColors.softBeige,
         onSurfaceVariant: AppColors.mutedText,
@@ -60,15 +72,16 @@ class AppTheme {
       );
 
   static AppBarTheme get _appBarTheme => AppBarTheme(
-        backgroundColor: AppColors.creamBackground,
+        backgroundColor: AppColors.creamBackground.withAlpha(245),
         foregroundColor: AppColors.charcoal,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.dmSans(
+        titleTextStyle: GoogleFonts.outfit(
           fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: AppColors.charcoal,
+          letterSpacing: 0,
         ),
         iconTheme: const IconThemeData(
           color: AppColors.charcoal,
@@ -86,8 +99,9 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.oliveGreen,
           foregroundColor: AppColors.white,
-          elevation: 0,
-          shadowColor: Colors.transparent,
+          elevation: 8,
+          shadowColor: AppColors.deepShadow,
+          surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.button),
           ),
@@ -104,7 +118,8 @@ class AppTheme {
       OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.oliveGreen,
-          side: const BorderSide(color: AppColors.oliveGreen, width: 1.5),
+          backgroundColor: AppColors.warmIvory,
+          side: const BorderSide(color: AppColors.oliveGreen, width: 1.2),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.button),
           ),
@@ -112,7 +127,8 @@ class AppTheme {
             horizontal: AppSpacing.xxl,
             vertical: AppSpacing.lg,
           ),
-          textStyle: AppTypography.buttonText.copyWith(color: AppColors.oliveGreen),
+          textStyle:
+              AppTypography.buttonText.copyWith(color: AppColors.oliveGreen),
           minimumSize: const Size(double.infinity, 52),
         ),
       );
@@ -120,7 +136,8 @@ class AppTheme {
   static TextButtonThemeData get _textButtonTheme => TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.oliveGreen,
-          textStyle: AppTypography.labelLg.copyWith(color: AppColors.oliveGreen),
+          textStyle:
+              AppTypography.labelLg.copyWith(color: AppColors.oliveGreen),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.sm,
@@ -130,18 +147,18 @@ class AppTheme {
 
   static InputDecorationTheme get _inputDecorationTheme => InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.white,
+        fillColor: AppColors.warmIvory,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.input),
-          borderSide: const BorderSide(color: AppColors.lightBorder, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.softBorder, width: 1.2),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.input),
-          borderSide: const BorderSide(color: AppColors.lightBorder, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.softBorder, width: 1.2),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.input),
@@ -163,18 +180,20 @@ class AppTheme {
       );
 
   static CardThemeData get _cardTheme => CardThemeData(
-        color: AppColors.white,
-        elevation: 0,
+        color: AppColors.warmIvory,
+        elevation: 8,
+        shadowColor: AppColors.ambientShadow,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.card),
-          side: const BorderSide(color: AppColors.lightBorder, width: 1),
+          side: const BorderSide(color: AppColors.softBorder, width: 1),
         ),
         margin: EdgeInsets.zero,
       );
 
   static BottomNavigationBarThemeData get _bottomNavTheme =>
       BottomNavigationBarThemeData(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.warmIvory,
         selectedItemColor: AppColors.oliveGreen,
         unselectedItemColor: AppColors.mutedText,
         selectedLabelStyle: AppTypography.navLabel,
@@ -187,7 +206,7 @@ class AppTheme {
 
   static NavigationBarThemeData get _navigationBarTheme =>
       NavigationBarThemeData(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.warmIvory,
         indicatorColor: AppColors.oliveLight,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -201,13 +220,13 @@ class AppTheme {
           }
           return AppTypography.navLabel.copyWith(color: AppColors.mutedText);
         }),
-        elevation: 8,
-        shadowColor: AppColors.cardShadow,
+        elevation: 16,
+        shadowColor: AppColors.deepShadow,
         surfaceTintColor: Colors.transparent,
       );
 
   static ChipThemeData get _chipTheme => ChipThemeData(
-        backgroundColor: AppColors.softBeige,
+        backgroundColor: AppColors.warmIvory,
         selectedColor: AppColors.oliveLight,
         disabledColor: AppColors.softBeige,
         labelStyle: AppTypography.labelMd,
@@ -217,9 +236,9 @@ class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.chip),
-          side: const BorderSide(color: AppColors.lightBorder),
+          side: const BorderSide(color: AppColors.softBorder),
         ),
-        side: const BorderSide(color: AppColors.lightBorder),
+        side: const BorderSide(color: AppColors.softBorder),
       );
 
   static DividerThemeData get _dividerTheme => const DividerThemeData(
@@ -236,7 +255,7 @@ class AppTheme {
       );
 
   static DialogThemeData get _dialogTheme => DialogThemeData(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.warmIvory,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.modal),
         ),
@@ -245,8 +264,9 @@ class AppTheme {
         contentTextStyle: AppTypography.bodyMd,
       );
 
-  static BottomSheetThemeData get _bottomSheetTheme => const BottomSheetThemeData(
-        backgroundColor: AppColors.white,
+  static BottomSheetThemeData get _bottomSheetTheme =>
+      const BottomSheetThemeData(
+        backgroundColor: AppColors.warmIvory,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(AppRadius.bottomSheet),
@@ -261,7 +281,10 @@ class AppTheme {
       FloatingActionButtonThemeData(
         backgroundColor: AppColors.oliveGreen,
         foregroundColor: AppColors.white,
-        elevation: 4,
+        elevation: 12,
+        focusElevation: 14,
+        hoverElevation: 14,
+        highlightElevation: 8,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),

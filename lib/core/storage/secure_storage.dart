@@ -9,8 +9,7 @@ class SecureStorage {
   Future<void> saveToken(String token) =>
       _storage.write(key: AppConstants.authTokenKey, value: token);
 
-  Future<String?> getToken() =>
-      _storage.read(key: AppConstants.authTokenKey);
+  Future<String?> getToken() => _storage.read(key: AppConstants.authTokenKey);
 
   Future<void> saveRefreshToken(String token) =>
       _storage.write(key: AppConstants.refreshTokenKey, value: token);
@@ -21,14 +20,12 @@ class SecureStorage {
   Future<void> saveUserRole(String role) =>
       _storage.write(key: AppConstants.userRoleKey, value: role);
 
-  Future<String?> getUserRole() =>
-      _storage.read(key: AppConstants.userRoleKey);
+  Future<String?> getUserRole() => _storage.read(key: AppConstants.userRoleKey);
 
   Future<void> saveUserId(String id) =>
       _storage.write(key: AppConstants.userIdKey, value: id);
 
-  Future<String?> getUserId() =>
-      _storage.read(key: AppConstants.userIdKey);
+  Future<String?> getUserId() => _storage.read(key: AppConstants.userIdKey);
 
   Future<void> clearAll() => _storage.deleteAll();
 

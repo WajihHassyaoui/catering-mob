@@ -15,7 +15,8 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  ConsumerState<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
@@ -33,8 +34,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
-    await ref.read(authProvider.notifier).forgotPassword(_emailCtrl.text.trim());
-    if (mounted) setState(() { _loading = false; _sent = true; });
+    await ref
+        .read(authProvider.notifier)
+        .forgotPassword(_emailCtrl.text.trim());
+    if (mounted) {
+      setState(() {
+        _loading = false;
+        _sent = true;
+      });
+    }
   }
 
   @override
@@ -69,11 +77,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               color: AppColors.oliveLight,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(Icons.lock_reset_rounded, size: 32, color: AppColors.oliveGreen),
+            child: const Icon(Icons.lock_reset_rounded,
+                size: 32, color: AppColors.oliveGreen),
           ).animate().scale(duration: 500.ms, curve: Curves.elasticOut),
           const SizedBox(height: AppSpacing.xl),
           Text('Forgot your password?', style: AppTypography.headingMd)
-              .animate().fade(delay: 150.ms, duration: 300.ms),
+              .animate()
+              .fade(delay: 150.ms, duration: 300.ms),
           const SizedBox(height: AppSpacing.sm),
           Text(
             "Enter the email address linked to your account and we'll send you a reset link.",
@@ -109,7 +119,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           icon: Icons.mark_email_read_outlined,
           iconColor: AppColors.successGreen,
           title: 'Check your inbox',
-          message: 'We sent a password reset link to ${_emailCtrl.text.trim()}. Check your email and follow the instructions.',
+          message:
+              'We sent a password reset link to ${_emailCtrl.text.trim()}. Check your email and follow the instructions.',
           actionLabel: 'Back to Login',
           onAction: () => context.go('/login'),
         ),

@@ -107,7 +107,9 @@ class GroupOrder {
     if (deadlinePassed) return 'Deadline passed';
     final diff = timeUntilDeadline;
     if (diff.inDays > 0) return '${diff.inDays}d ${diff.inHours % 24}h left';
-    if (diff.inHours > 0) return '${diff.inHours}h ${diff.inMinutes % 60}m left';
+    if (diff.inHours > 0) {
+      return '${diff.inHours}h ${diff.inMinutes % 60}m left';
+    }
     return '${diff.inMinutes}m left';
   }
 
@@ -191,8 +193,8 @@ class GroupOrderParticipant {
         userAvatar: json['user_avatar'] as String?,
         department: json['department'] as String?,
         mealSelections: (json['meal_selections'] as List? ?? [])
-            .map((e) => GroupOrderMealSelection.fromJson(
-                e as Map<String, dynamic>))
+            .map((e) =>
+                GroupOrderMealSelection.fromJson(e as Map<String, dynamic>))
             .toList(),
         hasSubmitted: json['has_submitted'] as bool? ?? false,
         submittedAt: json['submitted_at'] != null
@@ -206,8 +208,7 @@ class GroupOrderParticipant {
         'user_name': userName,
         'user_avatar': userAvatar,
         'department': department,
-        'meal_selections':
-            mealSelections.map((e) => e.toJson()).toList(),
+        'meal_selections': mealSelections.map((e) => e.toJson()).toList(),
         'has_submitted': hasSubmitted,
         'submitted_at': submittedAt?.toIso8601String(),
       };

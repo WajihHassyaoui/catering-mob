@@ -87,7 +87,8 @@ class InvoiceModel {
 
   bool get isPaid => status == 'paid';
   bool get isPending => status == 'pending';
-  bool get isOverdue => status == 'overdue' || (isPending && DateTime.now().isAfter(dueDate));
+  bool get isOverdue =>
+      status == 'overdue' || (isPending && DateTime.now().isAfter(dueDate));
 
   String get formattedTotal => '\$${total.toStringAsFixed(2)}';
   int get daysUntilDue => dueDate.difference(DateTime.now()).inDays;

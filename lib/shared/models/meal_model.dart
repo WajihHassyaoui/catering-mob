@@ -81,8 +81,7 @@ class MealModel {
         ingredients: List<String>.from(json['ingredients'] as List? ?? []),
         allergens: List<String>.from(json['allergens'] as List? ?? []),
         dietaryTags: List<String>.from(json['dietary_tags'] as List? ?? []),
-        preparationTimeMinutes:
-            json['preparation_time_minutes'] as int? ?? 30,
+        preparationTimeMinutes: json['preparation_time_minutes'] as int? ?? 30,
         isAvailable: json['is_available'] as bool? ?? true,
         isFeatured: json['is_featured'] as bool? ?? false,
         rating: (json['rating'] as num?)?.toDouble() ?? 0,
@@ -192,13 +191,11 @@ class CateringPackage {
         pricePerPerson: (json['price_per_person'] as num).toDouble(),
         minGuests: json['min_guests'] as int,
         maxGuests: json['max_guests'] as int,
-        includedItems:
-            List<String>.from(json['included_items'] as List? ?? []),
+        includedItems: List<String>.from(json['included_items'] as List? ?? []),
         imageUrl: json['image_url'] as String?,
         suitableEventTypes:
             List<String>.from(json['suitable_event_types'] as List? ?? []),
-        serviceTypes:
-            List<String>.from(json['service_types'] as List? ?? []),
+        serviceTypes: List<String>.from(json['service_types'] as List? ?? []),
         dietaryOptions:
             List<String>.from(json['dietary_options'] as List? ?? []),
         isAvailable: json['is_available'] as bool? ?? true,
@@ -262,8 +259,7 @@ class MealPrepPackage {
             List<String>.from(json['meal_categories'] as List? ?? []),
         dietaryOptions:
             List<String>.from(json['dietary_options'] as List? ?? []),
-        deliveryDays:
-            List<String>.from(json['delivery_days'] as List? ?? []),
+        deliveryDays: List<String>.from(json['delivery_days'] as List? ?? []),
         imageUrl: json['image_url'] as String?,
         isActive: json['is_active'] as bool? ?? true,
       );

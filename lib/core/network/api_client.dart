@@ -28,8 +28,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) =>
-      _dio.get<T>(path,
-          queryParameters: queryParameters, options: options);
+      _dio.get<T>(path, queryParameters: queryParameters, options: options);
 
   Future<Response<T>> post<T>(
     String path, {
@@ -134,7 +133,8 @@ class AppException implements Exception {
       case DioExceptionType.receiveTimeout:
         return AppException('Connection timed out. Please try again.', 408);
       case DioExceptionType.connectionError:
-        return AppException('No internet connection. Please check your network.', 0);
+        return AppException(
+            'No internet connection. Please check your network.', 0);
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
         final message = _parseErrorMessage(e.response?.data) ??
@@ -147,8 +147,7 @@ class AppException implements Exception {
 
   static String? _parseErrorMessage(dynamic data) {
     if (data is Map) {
-      return data['message'] as String? ??
-          data['error'] as String?;
+      return data['message'] as String? ?? data['error'] as String?;
     }
     return null;
   }

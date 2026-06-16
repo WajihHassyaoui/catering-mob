@@ -7,7 +7,10 @@ import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/constants/app_typography.dart';
 import '../../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../../shared/mock_data/mock_data.dart';
-import '../../../../../shared/widgets/meal_card.dart';
+import '../../../../../shared/mock_data/mock_meals.dart';
+import '../../../../../shared/widgets/app_button.dart';
+import '../../../../../shared/widgets/common_widgets.dart';
+import '../../../../../shared/widgets/status_badge.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -17,28 +20,87 @@ class AdminDashboardScreen extends ConsumerWidget {
     final companies = MockData.allCompanies;
     final orders = MockData.orders;
     final catering = MockData.cateringRequests;
-    final invoices = MockData.invoices;
     final pendingCompanies = companies.where((c) => c.isPending).toList();
+    final grossSales =
+        orders.fold<double>(0, (sum, order) => sum + order.total) +
+            MockData.invoices
+                .fold<double>(0, (sum, invoice) => sum + invoice.total);
 
     return Scaffold(
       backgroundColor: AppColors.creamBackground,
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: _buildHeader(context, ref)),
+          SliverToBoxAdapter(child: _Header(ref: ref)),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.pagePadding),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pagePadding,
+                AppSpacing.xl,
+                AppSpacing.pagePadding,
+                AppSpacing.huge,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildMetrics(companies.length, orders.length, catering.length, invoices.length),
+                  _Metrics(
+                    grossSales: grossSales,
+                    pendingCompanies: pendingCompanies.length,
+                    activeMenuItems:
+                        MockMeals.meals.where((m) => m.isAvailable).length,
+                    openQuotes:
+                        catering.where((c) => c.isPending || c.isQuoted).length,
+                  ),
                   const SizedBox(height: AppSpacing.sectionSpacing),
                   if (pendingCompanies.isNotEmpty) ...[
-                    _buildPendingCompanies(context, pendingCompanies),
+                    SectionHeader(
+                      title: 'Approval queue',
+                      subtitle: 'Companies waiting for operations review.',
+                      trailing: StatusBadge.fromStatus('pending',
+                          size: BadgeSize.small),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    ...pendingCompanies.map(
+                        (company) => _PendingCompanyCard(company: company)),
                     const SizedBox(height: AppSpacing.sectionSpacing),
                   ],
-                  _buildRecentActivity(context, orders, catering),
-                  const SizedBox(height: AppSpacing.huge),
+                  const SectionHeader(
+                    title: 'Operations feed',
+                    subtitle:
+                        'Recent orders and catering work that may need attention.',
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  ...orders.take(3).map(
+                        (order) => Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: _FeedCard(
+                            icon: Icons.receipt_long_outlined,
+                            color: AppColors.oliveGreen,
+                            title: order.orderNumber,
+                            subtitle:
+                                '${order.companyName ?? 'Individual'} - ${order.totalItems} items',
+                            trailing: '\$${order.total.toStringAsFixed(2)}',
+                            badge: StatusBadge.fromStatus(order.status,
+                                size: BadgeSize.small),
+                          ),
+                        ),
+                      ),
+                  ...catering.take(2).map(
+                        (request) => Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: _FeedCard(
+                            icon: Icons.event_available_rounded,
+                            color: AppColors.terracotta,
+                            title: request.eventType,
+                            subtitle:
+                                '${request.companyName ?? request.contactPerson} - ${request.numberOfGuests} guests',
+                            trailing: request.quotedPrice == null
+                                ? 'Quote'
+                                : '\$${request.quotedPrice!.toStringAsFixed(0)}',
+                            badge: StatusBadge.fromStatus(request.status,
+                                size: BadgeSize.small),
+                          ),
+                        ),
+                      ),
                 ],
               ),
             ),
@@ -47,12 +109,19 @@ class AdminDashboardScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildHeader(BuildContext context, WidgetRef ref) {
+class _Header extends StatelessWidget {
+  final WidgetRef ref;
+
+  const _Header({required this.ref});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.pagePadding,
-        MediaQuery.of(context).padding.top + 20,
+        MediaQuery.of(context).padding.top + AppSpacing.lg,
         AppSpacing.pagePadding,
         AppSpacing.xxl,
       ),
@@ -60,20 +129,27 @@ class AdminDashboardScreen extends ConsumerWidget {
       child: Row(
         children: [
           Container(
-            width: 48, height: 48,
+            width: 54,
+            height: 54,
             decoration: BoxDecoration(
-              color: AppColors.white.withAlpha(25),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.white.withAlpha(34),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.white.withAlpha(48)),
             ),
-            child: const Icon(Icons.admin_panel_settings_rounded, color: AppColors.white, size: 26),
+            child: const Icon(Icons.admin_panel_settings_rounded,
+                color: AppColors.white, size: 28),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Admin Panel', style: AppTypography.titleLg.copyWith(color: AppColors.white)),
-                Text('Platter Catering', style: AppTypography.bodySm.copyWith(color: AppColors.white.withAlpha(180))),
+                Text('Operations console',
+                    style: AppTypography.headingLg
+                        .copyWith(color: AppColors.white)),
+                Text('Live catering control center',
+                    style: AppTypography.bodySm
+                        .copyWith(color: AppColors.white.withAlpha(190))),
               ],
             ),
           ),
@@ -86,142 +162,217 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-    ).animate().fade(duration: 400.ms);
+    ).animate().fade(duration: 300.ms).slideY(begin: -0.03, end: 0);
   }
+}
 
-  Widget _buildMetrics(int companies, int orders, int catering, int invoices) {
+class _Metrics extends StatelessWidget {
+  final double grossSales;
+  final int pendingCompanies;
+  final int activeMenuItems;
+  final int openQuotes;
+
+  const _Metrics({
+    required this.grossSales,
+    required this.pendingCompanies,
+    required this.activeMenuItems,
+    required this.openQuotes,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final metrics = [
-      (Icons.business_rounded, '$companies', 'Companies', AppColors.oliveGreen),
-      (Icons.receipt_long_rounded, '$orders', 'Orders', AppColors.sageGreen),
-      (Icons.event_rounded, '$catering', 'Catering', AppColors.terracotta),
-      (Icons.receipt_outlined, '$invoices', 'Invoices', AppColors.warmGold),
+      DashboardStatCard(
+        icon: Icons.trending_up_rounded,
+        value: '\$${grossSales.toStringAsFixed(0)}',
+        title: 'Gross sales',
+        color: AppColors.terracotta,
+        subtitle: 'Demo total',
+        progress: 0.72,
+      ),
+      DashboardStatCard(
+        icon: Icons.pending_actions_rounded,
+        value: '$pendingCompanies',
+        title: 'Pending approvals',
+        color: AppColors.warmGold,
+      ),
+      DashboardStatCard(
+        icon: Icons.restaurant_menu_rounded,
+        value: '$activeMenuItems',
+        title: 'Active menu items',
+        color: AppColors.oliveGreen,
+      ),
+      DashboardStatCard(
+        icon: Icons.request_quote_outlined,
+        value: '$openQuotes',
+        title: 'Open quotes',
+        color: AppColors.sageGreen,
+      ),
     ];
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.5,
+        crossAxisCount: 2,
+        crossAxisSpacing: AppSpacing.md,
+        mainAxisSpacing: AppSpacing.md,
+        childAspectRatio: 1.12,
       ),
-      itemCount: 4,
-      itemBuilder: (_, i) => MetricCard(
-        icon: metrics[i].$1,
-        value: metrics[i].$2,
-        title: metrics[i].$3,
-        color: metrics[i].$4,
-      ),
-    ).animate().fade(delay: 200.ms, duration: 300.ms);
+      itemCount: metrics.length,
+      itemBuilder: (_, i) => metrics[i],
+    );
   }
+}
 
-  Widget _buildPendingCompanies(BuildContext context, List pending) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(children: [
-              const Icon(Icons.pending_actions_rounded, color: AppColors.warmGold, size: 18),
-              const SizedBox(width: 6),
-              Text('Pending Approvals', style: AppTypography.titleLg),
-            ]),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppColors.goldLight,
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Text('${pending.length}', style: AppTypography.labelSm.copyWith(color: AppColors.warmGold)),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        ...pending.map((c) => Container(
-          margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-          padding: const EdgeInsets.all(AppSpacing.cardPadding),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(AppRadius.card),
-            border: Border.all(color: AppColors.warmGold.withAlpha(60)),
+class _PendingCompanyCard extends StatelessWidget {
+  final dynamic company;
+
+  const _PendingCompanyCard({required this.company});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.warmIvory,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: AppColors.warmGold.withAlpha(60)),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.ambientShadow,
+            blurRadius: 22,
+            offset: Offset(0, 12),
           ),
-          child: Row(
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
             children: [
               Container(
-                width: 40, height: 40,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
                   color: AppColors.goldLight,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  borderRadius: BorderRadius.circular(18),
                 ),
-                child: Center(child: Text(c.initials, style: AppTypography.titleSm.copyWith(color: AppColors.warmGold))),
+                child: Center(
+                  child: Text(company.initials,
+                      style: AppTypography.titleMd
+                          .copyWith(color: AppColors.warmGold)),
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
-              Expanded(child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(c.name, style: AppTypography.titleSm),
-                  Text(c.industry, style: AppTypography.bodySm),
-                ],
-              )),
-              Row(children: [
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.oliveGreen, foregroundColor: AppColors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    minimumSize: Size.zero,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button)),
-                  ),
-                  child: const Text('Approve'),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(company.name, style: AppTypography.titleMd),
+                    Text(
+                      '${company.industry} - ${company.size}',
+                      style: AppTypography.bodySm
+                          .copyWith(color: AppColors.mutedText),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.errorRed, side: BorderSide(color: AppColors.errorRed),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    minimumSize: Size.zero,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button)),
-                  ),
-                  child: const Text('Reject'),
-                ),
-              ]),
+              ),
             ],
           ),
-        )),
-      ],
-    ).animate().fade(delay: 300.ms, duration: 300.ms);
-  }
-
-  Widget _buildRecentActivity(BuildContext context, List orders, List catering) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Recent Orders', style: AppTypography.titleLg),
-        const SizedBox(height: AppSpacing.md),
-        ...orders.take(3).map((o) => Container(
-          margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-          padding: const EdgeInsets.all(AppSpacing.cardPadding),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(AppRadius.card),
-            border: Border.all(color: AppColors.lightBorder),
-          ),
-          child: Row(
+          const SizedBox(height: AppSpacing.lg),
+          Row(
             children: [
-              const Icon(Icons.receipt_long_outlined, color: AppColors.oliveGreen),
+              Expanded(
+                child: AppButton(
+                  label: 'Reject',
+                  variant: AppButtonVariant.ghost,
+                  size: AppButtonSize.small,
+                  onPressed: () {},
+                ),
+              ),
               const SizedBox(width: AppSpacing.md),
-              Expanded(child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(o.id.substring(0, 8).toUpperCase(), style: AppTypography.titleSm),
-                  Text(o.status, style: AppTypography.bodySm.copyWith(color: AppColors.mutedText)),
-                ],
-              )),
-              Text('\$${o.total.toStringAsFixed(2)}',
-                  style: AppTypography.titleSm.copyWith(color: AppColors.terracotta)),
+              Expanded(
+                child: AppButton(
+                  label: 'Approve',
+                  size: AppButtonSize.small,
+                  onPressed: () {},
+                ),
+              ),
             ],
           ),
-        )),
-      ],
-    ).animate().fade(delay: 400.ms, duration: 300.ms);
+        ],
+      ),
+    );
+  }
+}
+
+class _FeedCard extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final String trailing;
+  final Widget badge;
+
+  const _FeedCard({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.trailing,
+    required this.badge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.warmIvory,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: AppColors.white.withAlpha(180)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: color.withAlpha(24),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: color),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: AppTypography.titleSm,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+                Text(subtitle,
+                    style: AppTypography.bodySm
+                        .copyWith(color: AppColors.mutedText),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(trailing,
+                  style: AppTypography.titleSm
+                      .copyWith(color: AppColors.terracotta)),
+              const SizedBox(height: 5),
+              badge,
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

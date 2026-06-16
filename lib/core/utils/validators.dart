@@ -27,13 +27,17 @@ class AppValidators {
 
   static String? Function(String?) confirmPassword(String? original) =>
       (String? value) {
-        if (value == null || value.isEmpty) return 'Please confirm your password.';
+        if (value == null || value.isEmpty) {
+          return 'Please confirm your password.';
+        }
         if (value != original) return 'Passwords do not match.';
         return null;
       };
 
   static String? phone(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Phone number is required.';
+    if (value == null || value.trim().isEmpty) {
+      return 'Phone number is required.';
+    }
     final cleaned = value.replaceAll(RegExp(r'[\s\-().+]'), '');
     if (cleaned.length < 10) return 'Enter a valid phone number.';
     return null;
@@ -47,7 +51,9 @@ class AppValidators {
   }
 
   static String? companyName(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Company name is required.';
+    if (value == null || value.trim().isEmpty) {
+      return 'Company name is required.';
+    }
     if (value.trim().length < 2) return 'Company name is too short.';
     return null;
   }
@@ -89,7 +95,9 @@ class AppValidators {
   }
 
   static String? guestCount(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Number of guests is required.';
+    if (value == null || value.trim().isEmpty) {
+      return 'Number of guests is required.';
+    }
     final n = int.tryParse(value.trim());
     if (n == null || n < 1) return 'Enter a valid number of guests.';
     if (n > 10000) return 'Contact us for events over 10,000 guests.';
@@ -97,7 +105,9 @@ class AppValidators {
   }
 
   static String? inviteCode(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Invite code is required.';
+    if (value == null || value.trim().isEmpty) {
+      return 'Invite code is required.';
+    }
     if (value.trim().length < 6) return 'Enter a valid invite code.';
     return null;
   }
@@ -109,7 +119,8 @@ class AppValidators {
   }
 
   // Compose multiple validators
-  static String? Function(String?) compose(List<String? Function(String?)> validators) =>
+  static String? Function(String?) compose(
+          List<String? Function(String?)> validators) =>
       (String? value) {
         for (final validator in validators) {
           final result = validator(value);

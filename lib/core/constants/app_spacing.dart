@@ -13,8 +13,8 @@ class AppSpacing {
   static const double giant = 64.0;
 
   static const double pagePadding = 20.0;
-  static const double cardPadding = 16.0;
-  static const double sectionSpacing = 24.0;
+  static const double cardPadding = 18.0;
+  static const double sectionSpacing = 28.0;
   static const double itemSpacing = 12.0;
 }
 
@@ -29,11 +29,11 @@ class AppRadius {
   static const double xxl = 24.0;
   static const double full = 100.0;
 
-  static const double card = 16.0;
-  static const double button = 12.0;
-  static const double input = 12.0;
+  static const double card = 20.0;
+  static const double button = 16.0;
+  static const double input = 16.0;
   static const double chip = 100.0;
-  static const double bottomSheet = 24.0;
-  static const double modal = 20.0;
-  static const double image = 12.0;
+  static const double bottomSheet = 28.0;
+  static const double modal = 24.0;
+  static const double image = 18.0;
 }

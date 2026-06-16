@@ -29,8 +29,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (isLoading) return null;
 
       final publicPaths = {
-        '/splash', '/onboarding', '/choose-role',
-        '/login', '/register/client', '/register/company', '/forgot-password',
+        '/splash',
+        '/onboarding',
+        '/choose-role',
+        '/login',
+        '/register/client',
+        '/register/company',
+        '/forgot-password',
       };
 
       if (!isAuthenticated && !publicPaths.contains(loc)) return '/login';
@@ -42,7 +47,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           if (role == AppConstants.roleCompany) {
             final companyId = authState.user?.companyId;
             final company = companyId != null
-                ? MockData.allCompanies.where((c) => c.id == companyId).firstOrNull
+                ? MockData.allCompanies
+                    .where((c) => c.id == companyId)
+                    .firstOrNull
                 : null;
             if (company?.isPending == true) return '/pending-approval';
             return '/company';
@@ -55,13 +62,23 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
-      GoRoute(path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
-      GoRoute(path: '/choose-role', builder: (_, __) => const ChooseRoleScreen()),
+      GoRoute(
+          path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
+      GoRoute(
+          path: '/choose-role', builder: (_, __) => const ChooseRoleScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
-      GoRoute(path: '/register/client', builder: (_, __) => const ClientRegisterScreen()),
-      GoRoute(path: '/register/company', builder: (_, __) => const CompanyRegisterScreen()),
-      GoRoute(path: '/forgot-password', builder: (_, __) => const ForgotPasswordScreen()),
-      GoRoute(path: '/pending-approval', builder: (_, __) => const PendingApprovalScreen()),
+      GoRoute(
+          path: '/register/client',
+          builder: (_, __) => const ClientRegisterScreen()),
+      GoRoute(
+          path: '/register/company',
+          builder: (_, __) => const CompanyRegisterScreen()),
+      GoRoute(
+          path: '/forgot-password',
+          builder: (_, __) => const ForgotPasswordScreen()),
+      GoRoute(
+          path: '/pending-approval',
+          builder: (_, __) => const PendingApprovalScreen()),
       ShellRoute(
         builder: (_, __, child) => child,
         routes: [
@@ -71,11 +88,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: 'meals/:id',
-                builder: (_, state) => _PlaceholderScreen('Meal Detail: ${state.pathParameters['id']}'),
+                builder: (_, state) => _PlaceholderScreen(
+                    'Meal Detail: ${state.pathParameters['id']}'),
               ),
               GoRoute(
                 path: 'orders/:id/track',
-                builder: (_, state) => _PlaceholderScreen('Track Order: ${state.pathParameters['id']}'),
+                builder: (_, state) => _PlaceholderScreen(
+                    'Track Order: ${state.pathParameters['id']}'),
               ),
             ],
           ),
@@ -85,19 +104,22 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: 'catering/:id',
-                builder: (_, state) => _PlaceholderScreen('Catering: ${state.pathParameters['id']}'),
+                builder: (_, state) => _PlaceholderScreen(
+                    'Catering: ${state.pathParameters['id']}'),
               ),
               GoRoute(
                 path: 'group-orders/:id',
-                builder: (_, state) => _PlaceholderScreen('Group Order: ${state.pathParameters['id']}'),
+                builder: (_, state) => _PlaceholderScreen(
+                    'Group Order: ${state.pathParameters['id']}'),
               ),
               GoRoute(
                 path: 'invoices/:id',
-                builder: (_, state) => _PlaceholderScreen('Invoice: ${state.pathParameters['id']}'),
+                builder: (_, state) => _PlaceholderScreen(
+                    'Invoice: ${state.pathParameters['id']}'),
               ),
               GoRoute(
                 path: 'members/invite',
-                builder: (_, __) => _PlaceholderScreen('Invite Member'),
+                builder: (_, __) => const _PlaceholderScreen('Invite Member'),
               ),
             ],
           ),

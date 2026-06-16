@@ -27,9 +27,11 @@ class PendingApprovalScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: AppColors.goldLight,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.warmGold.withAlpha(100), width: 3),
+                  border: Border.all(
+                      color: AppColors.warmGold.withAlpha(100), width: 3),
                 ),
-                child: const Icon(Icons.schedule_rounded, size: 48, color: AppColors.warmGold),
+                child: const Icon(Icons.schedule_rounded,
+                    size: 48, color: AppColors.warmGold),
               )
                   .animate()
                   .scale(duration: 600.ms, curve: Curves.elasticOut)
@@ -43,11 +45,12 @@ class PendingApprovalScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.md),
               Text(
                 "Your company account is pending review by our team. We'll notify you by email once it's approved.",
-                style: AppTypography.bodyLg.copyWith(color: AppColors.mutedText),
+                style:
+                    AppTypography.bodyLg.copyWith(color: AppColors.mutedText),
                 textAlign: TextAlign.center,
               ).animate().fade(delay: 450.ms, duration: 400.ms),
               const SizedBox(height: AppSpacing.xxxl),
-              _TimelineStep(
+              const _TimelineStep(
                 icon: Icons.check_circle_rounded,
                 label: 'Application Submitted',
                 description: 'Your company details have been received.',
@@ -55,7 +58,7 @@ class PendingApprovalScreen extends ConsumerWidget {
                 index: 0,
               ),
               const SizedBox(height: AppSpacing.lg),
-              _TimelineStep(
+              const _TimelineStep(
                 icon: Icons.manage_search_rounded,
                 label: 'Under Review',
                 description: 'Our team will verify your company information.',
@@ -64,10 +67,11 @@ class PendingApprovalScreen extends ConsumerWidget {
                 index: 1,
               ),
               const SizedBox(height: AppSpacing.lg),
-              _TimelineStep(
+              const _TimelineStep(
                 icon: Icons.verified_rounded,
                 label: 'Approved & Ready',
-                description: "You'll receive an email and can start using Platter.",
+                description:
+                    "You'll receive an email and can start using Platter.",
                 isCompleted: false,
                 index: 2,
               ),
