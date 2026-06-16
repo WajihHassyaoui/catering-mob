@@ -1,8 +1,14 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/models/meal_model.dart';
 import '../../../../shared/models/review_model.dart';
+import '../../../../shared/models/order_model.dart';
 import '../../../../shared/mock_data/mock_meals.dart';
+import '../../../../shared/mock_data/mock_data.dart';
+import '../../../../core/constants/app_colors.dart';
+import 'client_providers.dart';
+
 
 // ── Dietary Preferences Provider ──────────────────────────────────────────────
 
@@ -193,3 +199,74 @@ extension AddressModelCopy on AddressModel {
     );
   }
 }
+
+// ── Cart Checkout Helper ────────────────────────────────────────────────────────
+
+void placeCartOrder(WidgetRef ref, BuildContext context, List<CartItem> cartItems) {
+  if (cartItems.isEmpty) return;
+
+  final orderNumber = 'PLT-IND-${DateTime.now().millisecondsSinceEpoch % 100000}';
+
+  final orderItems = cartItems.map((c) => OrderItem(
+    id: 'oi_${c.mealId}_${DateTime.now().millisecondsSinceEpoch}',
+    mealId: c.mealId,
+    mealName: c.mealName,
+    mealImageUrl: c.mealImageUrl,
+    unitPrice: c.unitPrice,
+    quantity: c.quantity,
+  )).toList();
+
+  final subtotal = cartItems.fold(0.0, (sum, c) => sum + c.subtotal);
+  const deliveryFee = 5.0;
+  final tax = subtotal * 0.08;
+  final total = subtotal + deliveryFee + tax;
+
+  final newOrder = OrderModel(
+    id: 'ord_${DateTime.now().millisecondsSinceEpoch}',
+    orderNumber: orderNumber,
+    userId: 'u_client_1',
+    companyId: null,
+    companyName: null,
+    items: orderItems,
+    status: 'pending',
+    deliveryAddress: '150 Tech Park Drive, Suite 400, San Francisco, CA 94105',
+    deliveryDate: DateTime.now().add(const Duration(hours: 1)),
+    deliveryTime: '12:30 PM',
+    subtotal: subtotal,
+    deliveryFee: deliveryFee,
+    tax: tax,
+    total: total,
+    paymentMethod: 'card',
+    paymentStatus: 'pending',
+    createdAt: DateTime.now(),
+    statusHistory: [
+      OrderStatusEvent(status: 'pending', timestamp: DateTime.now()),
+    ],
+  );
+
+  MockData.orders.insert(0, newOrder);
+
+  // Clear the cart
+  ref.read(cartProvider.notifier).clear();
+
+  final totalQuantity = orderItems.fold(0, (sum, i) => sum + i.quantity);
+
+  ScaffoldMessenger.of(context).clearSnackBars();
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Order "$orderNumber" placed — $totalQuantity item(s)!'),
+      backgroundColor: AppColors.oliveGreen,
+      duration: const Duration(seconds: 4),
+      action: SnackBarAction(
+        label: 'TRACK',
+        textColor: Colors.white,
+        onPressed: () {
+          ref.read(clientNavIndexProvider.notifier).state = 3;
+        },
+      ),
+    ),
+  );
+
+  ref.read(clientNavIndexProvider.notifier).state = 3;
+}
+

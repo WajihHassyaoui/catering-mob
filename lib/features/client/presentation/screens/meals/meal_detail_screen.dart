@@ -6,10 +6,12 @@ import '../../../../../core/constants/app_typography.dart';
 import '../../../../../shared/mock_data/mock_data.dart';
 import '../../../../../shared/mock_data/mock_meals.dart';
 import '../../../../../shared/models/group_order_model.dart';
+import '../../../../../shared/models/order_model.dart';
 import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/common_widgets.dart';
 import '../../providers/client_providers.dart';
 import '../../providers/profile_providers.dart';
+import 'cart_sheet.dart';
 
 
 class MealDetailScreen extends ConsumerStatefulWidget {
@@ -332,90 +334,89 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
             ),
           ],
         ),
-        child: AppButton(
-          label: activeGroupOrder != null
-              ? 'Submit to ${activeGroupOrder.name}'
-              : 'Add to order',
-          icon: activeGroupOrder != null ? Icons.group_add_rounded : Icons.shopping_bag_outlined,
-          onPressed: () {
-            if (activeGroupOrder != null) {
-              // Submit meal to group order!
-              final matchIdx = MockData.groupOrders.indexWhere((go) => go.id == activeGroupOrder.id);
-              if (matchIdx != -1) {
-                final targetOrder = MockData.groupOrders[matchIdx];
-                final existingParticipantIdx = targetOrder.participants
-                    .indexWhere((p) => p.userId == 'u_client_1');
-
-                final mealSelection = GroupOrderMealSelection(
-                  mealId: meal.id,
-                  mealName: meal.name,
-                  quantity: 1,
-                  unitPrice: meal.price,
-                );
-
-                GroupOrderParticipant participant;
-                List<GroupOrderParticipant> updatedParticipants =
-                    List.from(targetOrder.participants);
-
-                if (existingParticipantIdx != -1) {
-                  final oldParticipant =
-                      targetOrder.participants[existingParticipantIdx];
-                  participant = GroupOrderParticipant(
-                    id: oldParticipant.id,
-                    userId: oldParticipant.userId,
-                    userName: oldParticipant.userName,
-                    department: oldParticipant.department,
-                    userAvatar: oldParticipant.userAvatar,
-                    mealSelections: [mealSelection],
-                    hasSubmitted: true,
-                    submittedAt: DateTime.now(),
-                  );
-                  updatedParticipants[existingParticipantIdx] = participant;
-                } else {
-                  participant = GroupOrderParticipant(
-                    id: 'p_${DateTime.now().millisecondsSinceEpoch}',
-                    userId: 'u_client_1',
-                    userName: 'Alex Morgan',
-                    department: 'Engineering',
-                    mealSelections: [mealSelection],
-                    hasSubmitted: true,
-                    submittedAt: DateTime.now(),
-                  );
-                  updatedParticipants.add(participant);
-                }
-
-                final newEstimatedTotal =
-                    (targetOrder.estimatedTotal ?? 0) + meal.price;
-                MockData.groupOrders[matchIdx] = targetOrder.copyWith(
-                  participants: updatedParticipants,
-                  participantCount: updatedParticipants.length,
-                  estimatedTotal: newEstimatedTotal,
-                );
-              }
-
-              // Clear group selection context
-              ref.read(activeGroupOrderProvider.notifier).state = null;
-              // Navigate back to the Group Orders tab
-              ref.read(clientNavIndexProvider.notifier).state = 2;
-
-              // Pop current meal details route and pop any nested detail route
-              Navigator.pop(context);
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                      'Meal "${meal.name}" submitted to group order "${activeGroupOrder.name}"!'),
-                  backgroundColor: AppColors.oliveGreen,
-                ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${meal.name} added to order')),
-              );
-              Navigator.pop(context);
-            }
-          },
-        ),
+        child: activeGroupOrder != null
+            ? AppButton(
+                label: 'Submit to ${activeGroupOrder.name}',
+                icon: Icons.group_add_rounded,
+                onPressed: () {
+                  final matchIdx = MockData.groupOrders
+                      .indexWhere((go) => go.id == activeGroupOrder.id);
+                  if (matchIdx != -1) {
+                    final targetOrder = MockData.groupOrders[matchIdx];
+                    final existingParticipantIdx = targetOrder.participants
+                        .indexWhere((p) => p.userId == 'u_client_1');
+                    final mealSelection = GroupOrderMealSelection(
+                      mealId: meal.id,
+                      mealName: meal.name,
+                      quantity: 1,
+                      unitPrice: meal.price,
+                    );
+                    List<GroupOrderParticipant> updatedParticipants =
+                        List.from(targetOrder.participants);
+                    if (existingParticipantIdx != -1) {
+                      final old = targetOrder.participants[existingParticipantIdx];
+                      updatedParticipants[existingParticipantIdx] =
+                          GroupOrderParticipant(
+                        id: old.id,
+                        userId: old.userId,
+                        userName: old.userName,
+                        department: old.department,
+                        userAvatar: old.userAvatar,
+                        mealSelections: [mealSelection],
+                        hasSubmitted: true,
+                        submittedAt: DateTime.now(),
+                      );
+                    } else {
+                      updatedParticipants.add(GroupOrderParticipant(
+                        id: 'p_${DateTime.now().millisecondsSinceEpoch}',
+                        userId: 'u_client_1',
+                        userName: 'Alex Morgan',
+                        department: 'Engineering',
+                        mealSelections: [mealSelection],
+                        hasSubmitted: true,
+                        submittedAt: DateTime.now(),
+                      ));
+                    }
+                    final newEstimatedTotal =
+                        (targetOrder.estimatedTotal ?? 0) + meal.price;
+                    MockData.groupOrders[matchIdx] = targetOrder.copyWith(
+                      participants: updatedParticipants,
+                      participantCount: updatedParticipants.length,
+                      estimatedTotal: newEstimatedTotal,
+                    );
+                  }
+                  ref.read(activeGroupOrderProvider.notifier).state = null;
+                  ref.read(clientNavIndexProvider.notifier).state = 2;
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(
+                        'Meal "${meal.name}" submitted to group order "${activeGroupOrder.name}"!'),
+                    backgroundColor: AppColors.oliveGreen,
+                  ));
+                },
+              )
+            : AppButton(
+                label: 'Add to cart',
+                icon: Icons.add_shopping_cart_rounded,
+                onPressed: () {
+                  ref.read(cartProvider.notifier).addItem(CartItem(
+                    mealId: meal.id,
+                    mealName: meal.name,
+                    mealImageUrl: meal.imageUrl,
+                    unitPrice: meal.price,
+                  ));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('${meal.name} added to cart!'),
+                    backgroundColor: AppColors.oliveGreen,
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(
+                      label: 'VIEW CART',
+                      textColor: Colors.white,
+                      onPressed: () => showCartSheet(context, ref),
+                    ),
+                  ));
+                },
+              ),
       ),
     );
   }

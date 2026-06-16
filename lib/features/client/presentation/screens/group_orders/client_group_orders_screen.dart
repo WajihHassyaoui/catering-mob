@@ -385,47 +385,84 @@ class _ClientGroupOrdersScreenState extends ConsumerState<ClientGroupOrdersScree
   }
 
   void _showGroupSheet(BuildContext context, GroupOrder groupOrder) {
-    AppBottomSheet.show(
-      context,
-      title: groupOrder.name,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.pagePadding,
-            0,
-            AppSpacing.pagePadding,
-            AppSpacing.xl,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${groupOrder.participantCount} people joined. Deadline ${groupOrder.deadlineCountdown}.',
-                style: AppTypography.bodyMd.copyWith(color: AppColors.mutedText),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.pagePadding,
+          AppSpacing.lg,
+          AppSpacing.pagePadding,
+          MediaQuery.of(sheetCtx).padding.bottom + AppSpacing.xl,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.softBorder,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              StepProgressIndicator(
-                totalSteps: 3,
-                currentStep:
-                    groupOrder.participants.any((p) => p.hasSubmitted) ? 3 : 1,
-                labels: const ['Joined', 'Meal', 'Confirm'],
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              AppButton(
-                label: 'Select meal',
-                icon: Icons.restaurant_menu_rounded,
-                onPressed: () {
-                  ref.read(activeGroupOrderProvider.notifier).state = groupOrder;
-                  ref.read(clientNavIndexProvider.notifier).state = 1;
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
+            ),
+            // Title row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    groupOrder.name,
+                    style: AppTypography.titleLg,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(sheetCtx).pop(),
+                  icon: const Icon(Icons.close_rounded, color: AppColors.mutedText),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              '${groupOrder.participantCount} people joined · Deadline ${groupOrder.deadlineCountdown}',
+              style: AppTypography.bodyMd.copyWith(color: AppColors.mutedText),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            StepProgressIndicator(
+              totalSteps: 3,
+              currentStep: groupOrder.participants.any((p) => p.hasSubmitted) ? 3 : 1,
+              labels: const ['Joined', 'Meal', 'Confirm'],
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            AppButton(
+              label: 'Select meal',
+              icon: Icons.restaurant_menu_rounded,
+              onPressed: () {
+                ref.read(activeGroupOrderProvider.notifier).state = groupOrder;
+                ref.read(clientNavIndexProvider.notifier).state = 1;
+                Navigator.of(sheetCtx).pop();
+              },
+            ),
+          ],
         ),
       ),
     );
   }
+
 }
 
 class _JoinCodePanel extends StatelessWidget {

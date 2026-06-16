@@ -5,8 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/constants/app_typography.dart';
+import '../../../../../shared/models/order_model.dart';
 import '../../../../../shared/widgets/meal_card.dart';
+import '../../providers/client_providers.dart';
 import '../../providers/profile_providers.dart';
+import '../meals/cart_sheet.dart';
 
 
 class FavoriteMealsScreen extends ConsumerWidget {
@@ -53,10 +56,25 @@ class FavoriteMealsScreen extends ConsumerWidget {
                           ),
                         );
                       },
-                      onAddToCart: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${meal.name} added to order')),
+                  onAddToCart: () {
+                        ref.read(cartProvider.notifier).addItem(
+                          CartItem(
+                            mealId: meal.id,
+                            mealName: meal.name,
+                            mealImageUrl: meal.imageUrl,
+                            unitPrice: meal.price,
+                          ),
                         );
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('${meal.name} added to cart!'),
+                          backgroundColor: AppColors.oliveGreen,
+                          duration: const Duration(seconds: 2),
+                          action: SnackBarAction(
+                            label: 'VIEW CART',
+                            textColor: Colors.white,
+                            onPressed: () => showCartSheet(context, ref),
+                          ),
+                        ));
                       },
                     ).animate().fade(delay: Duration(milliseconds: i * 50), duration: 250.ms),
                   );

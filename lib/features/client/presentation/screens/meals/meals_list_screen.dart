@@ -10,9 +10,11 @@ import '../../../../../core/constants/app_typography.dart';
 import '../../../../../shared/mock_data/mock_meals.dart';
 import '../../../../../shared/mock_data/mock_data.dart';
 import '../../../../../shared/models/meal_model.dart';
+import '../../../../../shared/models/order_model.dart';
 import '../../../../../shared/widgets/common_widgets.dart';
 import '../../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../../shared/widgets/meal_card.dart';
+import 'cart_sheet.dart';
 
 final _selectedCategoryProvider = StateProvider<String?>((ref) => null);
 final _searchQueryProvider = StateProvider<String>((ref) => '');
@@ -189,7 +191,26 @@ class MealsListScreen extends ConsumerWidget {
                                     ),
                                   );
                                 } else {
-                                  _addToCart(context, meals[i].name);
+                                  // Add to personal cart
+                                  final meal = meals[i];
+                                  ref.read(cartProvider.notifier).addItem(CartItem(
+                                    mealId: meal.id,
+                                    mealName: meal.name,
+                                    mealImageUrl: meal.imageUrl,
+                                    unitPrice: meal.price,
+                                  ));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('${meal.name} added to cart!'),
+                                      backgroundColor: AppColors.oliveGreen,
+                                      duration: const Duration(seconds: 2),
+                                      action: SnackBarAction(
+                                        label: 'VIEW CART',
+                                        textColor: Colors.white,
+                                        onPressed: () => showCartSheet(context, ref),
+                                      ),
+                                    ),
+                                  );
                                 }
                               },
                             ),
@@ -216,12 +237,9 @@ class MealsListScreen extends ConsumerWidget {
         .name;
   }
 
-  static void _addToCart(BuildContext context, String mealName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$mealName added to order')),
-    );
-  }
 }
+
+
 
 class _SearchBar extends StatelessWidget {
   final WidgetRef ref;
