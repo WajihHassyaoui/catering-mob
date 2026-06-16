@@ -9,6 +9,8 @@ import '../../../../../shared/models/group_order_model.dart';
 import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/common_widgets.dart';
 import '../../providers/client_providers.dart';
+import '../../providers/profile_providers.dart';
+
 
 class MealDetailScreen extends ConsumerStatefulWidget {
   final String mealId;
@@ -23,8 +25,6 @@ class MealDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
-  bool _isFavorite = false;
-
   @override
   Widget build(BuildContext context) {
     final meal = MockMeals.meals.firstWhere(
@@ -60,27 +60,30 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
                 padding: const EdgeInsets.only(right: 12.0),
                 child: CircleAvatar(
                   backgroundColor: AppColors.white.withAlpha(204),
-                  child: IconButton(
-                    icon: Icon(
-                      _isFavorite ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-                      color: _isFavorite ? AppColors.terracotta : AppColors.charcoal,
-                      size: 20,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isFavorite = !_isFavorite;
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            _isFavorite
-                                ? '${meal.name} added to favorites!'
-                                : '${meal.name} removed from favorites.',
-                          ),
-                          duration: const Duration(seconds: 1),
+                  child: Builder(
+                    builder: (context) {
+                      final isFavorite = ref.watch(favoritesProvider).any((m) => m.id == meal.id);
+                      return IconButton(
+                        icon: Icon(
+                          isFavorite ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+                          color: isFavorite ? AppColors.terracotta : AppColors.charcoal,
+                          size: 20,
                         ),
+                        onPressed: () {
+                          ref.read(favoritesProvider.notifier).toggleFavorite(meal);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                !isFavorite
+                                    ? '${meal.name} added to favorites!'
+                                    : '${meal.name} removed from favorites.',
+                              ),
+                              duration: const Duration(seconds: 1),
+                            ),
+                          );
+                        },
                       );
-                    },
+                    }
                   ),
                 ),
               ),

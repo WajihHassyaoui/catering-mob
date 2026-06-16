@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,24 @@ import '../../../../../shared/mock_data/mock_data.dart';
 import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/common_widgets.dart';
 import '../../../../../shared/models/user_model.dart';
+import '../../providers/profile_providers.dart';
+
+ImageProvider? _getAvatarImage(String? url) {
+  if (url == null || url.isEmpty) return null;
+  if (url.startsWith('http')) {
+    return NetworkImage(url);
+  }
+  if (url.startsWith('data:image/')) {
+    try {
+      final base64Content = url.split(',').last;
+      return MemoryImage(base64Decode(base64Content));
+    } catch (_) {
+      return null;
+    }
+  }
+  return null;
+}
+
 
 class ClientProfileScreen extends ConsumerWidget {
   const ClientProfileScreen({super.key});
@@ -56,7 +75,7 @@ class ClientProfileScreen extends ConsumerWidget {
                 subtitle: 'Keep recommendations aligned with your routine.',
               ),
               const SizedBox(height: AppSpacing.md),
-              _PreferenceCard(),
+              const _PreferenceCard(),
             ],
             if (user.role != 'admin') ...[
               const SizedBox(height: AppSpacing.sectionSpacing),
@@ -152,10 +171,13 @@ class _ProfileHero extends StatelessWidget {
           CircleAvatar(
             radius: 34,
             backgroundColor: AppColors.white.withAlpha(36),
-            child: Text(
-              user.initials,
-              style: AppTypography.headingMd.copyWith(color: AppColors.white),
-            ),
+            backgroundImage: _getAvatarImage(user.avatarUrl),
+            child: _getAvatarImage(user.avatarUrl) != null
+                ? null
+                : Text(
+                    user.initials,
+                    style: AppTypography.headingMd.copyWith(color: AppColors.white),
+                  ),
           ),
           const SizedBox(width: AppSpacing.lg),
           Expanded(
@@ -274,15 +296,23 @@ class _StatsRow extends StatelessWidget {
   }
 }
 
-class _PreferenceCard extends StatelessWidget {
+class _PreferenceCard extends ConsumerWidget {
+  const _PreferenceCard();
+
   @override
-  Widget build(BuildContext context) {
-    const preferences = [
-      ('High Protein', Icons.fitness_center_rounded, AppColors.oliveGreen),
-      ('Gluten-Free', Icons.spa_rounded, AppColors.sageGreen),
-      ('Halal', Icons.verified_outlined, AppColors.terracotta),
-      ('No Peanuts', Icons.warning_amber_rounded, AppColors.warmGold),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activePreferences = ref.watch(dietaryPreferencesProvider);
+
+    final Map<String, (IconData, Color)> tagMeta = {
+      'High Protein': (Icons.fitness_center_rounded, AppColors.oliveGreen),
+      'Gluten-Free': (Icons.spa_rounded, AppColors.sageGreen),
+      'Halal': (Icons.verified_outlined, AppColors.terracotta),
+      'No Peanuts': (Icons.warning_amber_rounded, AppColors.warmGold),
+      'Vegan': (Icons.eco_rounded, AppColors.sageGreen),
+      'Vegetarian': (Icons.grass_rounded, AppColors.oliveGreen),
+      'Keto': (Icons.bolt_rounded, AppColors.warmGold),
+      'Low Carb': (Icons.speed_rounded, AppColors.terracotta),
+    };
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
@@ -294,26 +324,125 @@ class _PreferenceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: preferences
-                .map((item) =>
-                    InfoPill(icon: item.$2, label: item.$1, color: item.$3))
-                .toList(),
-          ),
+          if (activePreferences.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                'No dietary preferences selected.',
+                style: AppTypography.bodySm.copyWith(color: AppColors.mutedText),
+              ),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: activePreferences.map((pref) {
+                final meta = tagMeta[pref] ?? (Icons.restaurant_menu_rounded, AppColors.oliveGreen);
+                return InfoPill(icon: meta.$1, label: pref, color: meta.$2);
+              }).toList(),
+            ),
           const SizedBox(height: AppSpacing.lg),
           AppButton(
             label: 'Update preferences',
             icon: Icons.tune_rounded,
             variant: AppButtonVariant.outline,
-            onPressed: () {},
+            onPressed: () => _showPreferencesBottomSheet(context, ref, activePreferences),
           ),
         ],
       ),
     );
   }
+
+  void _showPreferencesBottomSheet(
+      BuildContext context, WidgetRef ref, List<String> currentPrefs) {
+    final availablePrefs = [
+      'High Protein',
+      'Gluten-Free',
+      'Halal',
+      'No Peanuts',
+      'Vegan',
+      'Vegetarian',
+      'Keto',
+      'Low Carb',
+    ];
+
+    // Create a copy of current preferences to modify inside the modal
+    final tempPrefs = List<String>.from(currentPrefs);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.creamBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.pagePadding),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Dietary Preferences', style: AppTypography.headingMd),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Select preferences to customize your food experience.',
+                      style: AppTypography.bodySm.copyWith(color: AppColors.mutedText),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Flexible(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: availablePrefs.map((pref) {
+                          final isSelected = tempPrefs.contains(pref);
+                          return CheckboxListTile(
+                            activeColor: AppColors.oliveGreen,
+                            title: Text(pref, style: AppTypography.titleSm),
+                            value: isSelected,
+                            onChanged: (val) {
+                              setModalState(() {
+                                if (val == true) {
+                                  tempPrefs.add(pref);
+                                } else {
+                                  tempPrefs.remove(pref);
+                                }
+                              });
+                              ref
+                                  .read(dietaryPreferencesProvider.notifier)
+                                  .updatePreferences(tempPrefs);
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    AppButton(
+                      label: 'Save & Apply',
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 }
+
 
 class _CompanyCard extends StatelessWidget {
   final dynamic user;
@@ -422,13 +551,19 @@ class _SettingsPanel extends StatelessWidget {
           Icons.location_on_outlined,
           'Delivery addresses',
           'Office and saved locations',
-          () {},
+          () => context.push('/client/profile/addresses'),
         ),
         (
           Icons.favorite_outline_rounded,
           'Favorite meals',
           'Fast reorder shortcuts',
-          () {},
+          () => context.push('/client/profile/favorites'),
+        ),
+        (
+          Icons.rate_review_outlined,
+          'My reviews',
+          'Meal ratings and comments',
+          () => context.push('/client/profile/reviews'),
         ),
         (Icons.help_outline_rounded, 'Support', 'Get help from Platter', () {}),
         (Icons.policy_outlined, 'Privacy', 'Terms and policies', () {}),

@@ -1,31 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/constants/app_typography.dart';
-import '../../../../../shared/mock_data/mock_meals.dart';
-import '../../../../../shared/models/meal_model.dart';
 import '../../../../../shared/widgets/meal_card.dart';
+import '../../providers/profile_providers.dart';
 
-class FavoriteMealsScreen extends StatefulWidget {
+
+class FavoriteMealsScreen extends ConsumerWidget {
   const FavoriteMealsScreen({super.key});
 
   @override
-  State<FavoriteMealsScreen> createState() => _FavoriteMealsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoriteMeals = ref.watch(favoritesProvider);
 
-class _FavoriteMealsScreenState extends State<FavoriteMealsScreen> {
-  late List<MealModel> _favoriteMeals;
-
-  @override
-  void initState() {
-    super.initState();
-    _favoriteMeals = MockMeals.meals.take(3).toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.creamBackground,
       appBar: AppBar(
@@ -39,15 +29,15 @@ class _FavoriteMealsScreenState extends State<FavoriteMealsScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: _favoriteMeals.isEmpty
+        child: favoriteMeals.isEmpty
             ? Center(
                 child: Text('No favorite meals yet', style: AppTypography.bodyMd.copyWith(color: AppColors.mutedText)),
               )
             : ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding, vertical: AppSpacing.xl),
-                itemCount: _favoriteMeals.length,
+                itemCount: favoriteMeals.length,
                 itemBuilder: (context, i) {
-                  final meal = _favoriteMeals[i];
+                  final meal = favoriteMeals[i];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.lg),
                     child: MealCard(
@@ -55,11 +45,12 @@ class _FavoriteMealsScreenState extends State<FavoriteMealsScreen> {
                       isFavorite: true,
                       onTap: () => context.push('/client/meals/${meal.id}'),
                       onToggleFavorite: () {
-                        setState(() {
-                          _favoriteMeals.removeAt(i);
-                        });
+                        ref.read(favoritesProvider.notifier).toggleFavorite(meal);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${meal.name} removed from favorites')),
+                          SnackBar(
+                            content: Text('${meal.name} removed from favorites'),
+                            duration: const Duration(seconds: 1),
+                          ),
                         );
                       },
                       onAddToCart: () {
