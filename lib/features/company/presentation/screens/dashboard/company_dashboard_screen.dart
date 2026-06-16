@@ -72,6 +72,7 @@ class CompanyDashboardScreen extends ConsumerWidget {
             child: _Header(
               company: company,
               firstName: user.firstName,
+              onProfile: () => context.push('/company/profile'),
               onLogout: () => _confirmLogout(context, ref),
             ),
           ),
@@ -117,11 +118,13 @@ class CompanyDashboardScreen extends ConsumerWidget {
 class _Header extends StatelessWidget {
   final dynamic company;
   final String firstName;
+  final VoidCallback onProfile;
   final VoidCallback onLogout;
 
   const _Header({
     required this.company,
     required this.firstName,
+    required this.onProfile,
     required this.onLogout,
   });
 
@@ -176,6 +179,12 @@ class _Header extends StatelessWidget {
               ),
               StatusBadge.fromStatus(company.status, size: BadgeSize.small),
               const SizedBox(width: AppSpacing.sm),
+              IconButton(
+                onPressed: onProfile,
+                icon: const Icon(Icons.person_outline_rounded, color: AppColors.white),
+                tooltip: 'Profile',
+              ),
+              const SizedBox(width: AppSpacing.xs),
               IconButton(
                 onPressed: onLogout,
                 icon: const Icon(Icons.logout_rounded, color: AppColors.white),

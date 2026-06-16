@@ -11,6 +11,7 @@ import '../features/auth/presentation/screens/company_register_screen.dart';
 import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/auth/presentation/screens/pending_approval_screen.dart';
 import '../features/client/presentation/navigation/client_navigation.dart';
+import '../features/client/presentation/screens/profile/client_profile_screen.dart';
 import '../features/company/presentation/navigation/company_navigation.dart';
 import '../features/admin/presentation/navigation/admin_navigation.dart';
 import '../core/constants/app_constants.dart';
@@ -121,11 +122,21 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: 'members/invite',
                 builder: (_, __) => const _PlaceholderScreen('Invite Member'),
               ),
+              GoRoute(
+                path: 'profile',
+                builder: (_, __) => const ClientProfileScreen(),
+              ),
             ],
           ),
           GoRoute(
             path: '/admin',
             builder: (_, __) => const AdminNavigation(),
+            routes: [
+              GoRoute(
+                path: 'profile',
+                builder: (_, __) => const ClientProfileScreen(),
+              ),
+            ],
           ),
         ],
       ),

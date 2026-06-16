@@ -9,6 +9,7 @@ import '../../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../../shared/mock_data/mock_data.dart';
 import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/common_widgets.dart';
+import '../../../../../shared/models/user_model.dart';
 
 class ClientProfileScreen extends ConsumerWidget {
   const ClientProfileScreen({super.key});
@@ -16,6 +17,7 @@ class ClientProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProvider).user ?? MockData.clientUser;
+    final canPop = Navigator.canPop(context);
 
     return Scaffold(
       backgroundColor: AppColors.creamBackground,
@@ -28,24 +30,46 @@ class ClientProfileScreen extends ConsumerWidget {
             AppSpacing.huge,
           ),
           children: [
+            if (canPop) ...[
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                    color: AppColors.oliveGreen,
+                  ),
+                  Text(
+                    'Profile',
+                    style: AppTypography.headingMd,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+            ],
             _ProfileHero(user: user),
             const SizedBox(height: AppSpacing.sectionSpacing),
-            _StatsRow(),
-            const SizedBox(height: AppSpacing.sectionSpacing),
-            const SectionHeader(
-              title: 'Meal preferences',
-              subtitle: 'Keep recommendations aligned with your routine.',
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _PreferenceCard(),
-            const SizedBox(height: AppSpacing.sectionSpacing),
-            const SectionHeader(title: 'Company workspace'),
-            const SizedBox(height: AppSpacing.md),
-            _CompanyCard(user: user),
+            _StatsRow(user: user),
+            if (user.role == 'client') ...[
+              const SizedBox(height: AppSpacing.sectionSpacing),
+              const SectionHeader(
+                title: 'Meal preferences',
+                subtitle: 'Keep recommendations aligned with your routine.',
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _PreferenceCard(),
+            ],
+            if (user.role != 'admin') ...[
+              const SizedBox(height: AppSpacing.sectionSpacing),
+              SectionHeader(
+                title: user.role == 'company' ? 'Company administration' : 'Company workspace',
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _CompanyCard(user: user),
+            ],
             const SizedBox(height: AppSpacing.sectionSpacing),
             const SectionHeader(title: 'Account'),
             const SizedBox(height: AppSpacing.md),
-            _SettingsPanel(),
+            _SettingsPanel(role: user.role),
             const SizedBox(height: AppSpacing.sectionSpacing),
             AppButton(
               label: 'Log out',
@@ -182,13 +206,33 @@ class _ProfileHero extends StatelessWidget {
 }
 
 class _StatsRow extends StatelessWidget {
+  final UserModel user;
+
+  const _StatsRow({required this.user});
+
   @override
   Widget build(BuildContext context) {
-    final stats = [
-      ('12', 'Orders'),
-      ('4.8', 'Rating'),
-      ('3', 'Groups'),
-    ];
+    final List<(String, String)> stats;
+
+    if (user.role == 'company') {
+      stats = [
+        ('${MockData.approvedCompany.memberCount}', 'Team'),
+        ('Active', 'Status'),
+        ('${MockData.groupOrders.length}', 'Orders'),
+      ];
+    } else if (user.role == 'admin') {
+      stats = [
+        ('${MockData.allCompanies.length}', 'Companies'),
+        ('Operations', 'Status'),
+        ('Global', 'Console'),
+      ];
+    } else {
+      stats = [
+        ('12', 'Orders'),
+        ('4.8', 'Rating'),
+        ('3', 'Groups'),
+      ];
+    }
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
@@ -278,6 +322,7 @@ class _CompanyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCompany = user.role == 'company';
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
@@ -291,11 +336,13 @@ class _CompanyCard extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: AppColors.terracottaLight,
+              color: isCompany ? AppColors.oliveLight : AppColors.terracottaLight,
               borderRadius: BorderRadius.circular(18),
             ),
-            child:
-                const Icon(Icons.business_rounded, color: AppColors.terracotta),
+            child: Icon(
+              isCompany ? Icons.admin_panel_settings_rounded : Icons.business_rounded,
+              color: isCompany ? AppColors.oliveGreen : AppColors.terracotta,
+            ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -303,14 +350,16 @@ class _CompanyCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                    user.companyId != null
+                    isCompany
                         ? 'TechFlow Solutions'
-                        : 'Join a company',
+                        : (user.companyId != null ? 'TechFlow Solutions' : 'Join a company'),
                     style: AppTypography.titleMd),
                 Text(
-                  user.companyId != null
-                      ? 'Senior Engineer - Engineering'
-                      : 'Enter an invite code to connect benefits.',
+                  isCompany
+                      ? 'Company Workspace Admin'
+                      : (user.companyId != null
+                          ? 'Senior Engineer - Engineering'
+                          : 'Enter an invite code to connect benefits.'),
                   style:
                       AppTypography.bodySm.copyWith(color: AppColors.mutedText),
                 ),
@@ -325,22 +374,66 @@ class _CompanyCard extends StatelessWidget {
 }
 
 class _SettingsPanel extends StatelessWidget {
+  final String role;
+
+  const _SettingsPanel({required this.role});
+
   @override
   Widget build(BuildContext context) {
-    final tiles = [
-      (
-        Icons.location_on_outlined,
-        'Delivery addresses',
-        'Office and saved locations'
-      ),
-      (
-        Icons.favorite_outline_rounded,
-        'Favorite meals',
-        'Fast reorder shortcuts'
-      ),
-      (Icons.help_outline_rounded, 'Support', 'Get help from Platter'),
-      (Icons.policy_outlined, 'Privacy', 'Terms and policies'),
-    ];
+    final List<(IconData, String, String, VoidCallback)> tiles;
+
+    if (role == 'company') {
+      tiles = [
+        (
+          Icons.people_outline_rounded,
+          'Manage members',
+          'Invite and manage team members',
+          () => context.push('/company/members/invite'),
+        ),
+        (
+          Icons.receipt_long_outlined,
+          'Billing & Invoices',
+          'View and download invoices',
+          () {},
+        ),
+        (Icons.help_outline_rounded, 'Support', 'Get help from Platter', () {}),
+        (Icons.policy_outlined, 'Privacy', 'Terms and policies', () {}),
+      ];
+    } else if (role == 'admin') {
+      tiles = [
+        (
+          Icons.business_outlined,
+          'Companies administration',
+          'Approve and review company workspaces',
+          () {},
+        ),
+        (
+          Icons.restaurant_menu_outlined,
+          'Menu editor',
+          'Add, edit or disable menu items',
+          () {},
+        ),
+        (Icons.help_outline_rounded, 'Support', 'System support tickets', () {}),
+        (Icons.policy_outlined, 'Privacy & Rules', 'Global policies', () {}),
+      ];
+    } else {
+      tiles = [
+        (
+          Icons.location_on_outlined,
+          'Delivery addresses',
+          'Office and saved locations',
+          () {},
+        ),
+        (
+          Icons.favorite_outline_rounded,
+          'Favorite meals',
+          'Fast reorder shortcuts',
+          () {},
+        ),
+        (Icons.help_outline_rounded, 'Support', 'Get help from Platter', () {}),
+        (Icons.policy_outlined, 'Privacy', 'Terms and policies', () {}),
+      ];
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -354,7 +447,7 @@ class _SettingsPanel extends StatelessWidget {
           return Column(
             children: [
               ListTile(
-                onTap: () {},
+                onTap: tile.$4,
                 leading: Container(
                   width: 38,
                   height: 38,

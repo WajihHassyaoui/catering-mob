@@ -154,11 +154,18 @@ class _Header extends StatelessWidget {
             ),
           ),
           IconButton(
+            onPressed: () => context.push('/admin/profile'),
+            icon: const Icon(Icons.person_outline_rounded, color: AppColors.white),
+            tooltip: 'Profile',
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          IconButton(
             onPressed: () async {
               await ref.read(authProvider.notifier).logout();
               if (context.mounted) context.go('/login');
             },
             icon: const Icon(Icons.logout_rounded, color: AppColors.white),
+            tooltip: 'Log out',
           ),
         ],
       ),
