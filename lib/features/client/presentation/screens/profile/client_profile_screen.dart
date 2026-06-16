@@ -65,7 +65,7 @@ class ClientProfileScreen extends ConsumerWidget {
   void _confirmLogout(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text('Log out', style: AppTypography.headingMd),
         content: Text(
           'Are you sure you want to leave this session?',
@@ -80,7 +80,7 @@ class ClientProfileScreen extends ConsumerWidget {
                 child: AppButton(
                   label: 'Cancel',
                   variant: AppButtonVariant.ghost,
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(dialogContext),
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -89,7 +89,7 @@ class ClientProfileScreen extends ConsumerWidget {
                   label: 'Log out',
                   variant: AppButtonVariant.danger,
                   onPressed: () async {
-                    Navigator.pop(context);
+                    Navigator.pop(dialogContext);
                     await ref.read(authProvider.notifier).logout();
                     if (context.mounted) context.go('/login');
                   },

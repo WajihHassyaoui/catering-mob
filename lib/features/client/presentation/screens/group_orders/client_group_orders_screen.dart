@@ -81,7 +81,7 @@ class ClientGroupOrdersScreen extends ConsumerWidget {
     final ctrl = TextEditingController();
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text('Join group order', style: AppTypography.headingMd),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -114,7 +114,7 @@ class ClientGroupOrdersScreen extends ConsumerWidget {
                 child: AppButton(
                   label: 'Cancel',
                   variant: AppButtonVariant.ghost,
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(dialogContext),
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -122,7 +122,7 @@ class ClientGroupOrdersScreen extends ConsumerWidget {
                 child: AppButton(
                   label: 'Join',
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.pop(dialogContext);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(

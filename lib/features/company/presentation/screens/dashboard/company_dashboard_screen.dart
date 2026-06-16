@@ -15,6 +15,46 @@ import '../../navigation/company_navigation.dart';
 class CompanyDashboardScreen extends ConsumerWidget {
   const CompanyDashboardScreen({super.key});
 
+  void _confirmLogout(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Log out', style: AppTypography.headingMd),
+        content: Text(
+          'Are you sure you want to leave this session?',
+          style: AppTypography.bodyMd.copyWith(color: AppColors.mutedText),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(
+            AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.xl),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  label: 'Cancel',
+                  variant: AppButtonVariant.ghost,
+                  onPressed: () => Navigator.pop(dialogContext),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: AppButton(
+                  label: 'Log out',
+                  variant: AppButtonVariant.danger,
+                  onPressed: () async {
+                    Navigator.pop(dialogContext);
+                    await ref.read(authProvider.notifier).logout();
+                    if (context.mounted) context.go('/login');
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final company = MockData.approvedCompany;
@@ -29,7 +69,12 @@ class CompanyDashboardScreen extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-              child: _Header(company: company, firstName: user.firstName)),
+            child: _Header(
+              company: company,
+              firstName: user.firstName,
+              onLogout: () => _confirmLogout(context, ref),
+            ),
+          ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -72,8 +117,13 @@ class CompanyDashboardScreen extends ConsumerWidget {
 class _Header extends StatelessWidget {
   final dynamic company;
   final String firstName;
+  final VoidCallback onLogout;
 
-  const _Header({required this.company, required this.firstName});
+  const _Header({
+    required this.company,
+    required this.firstName,
+    required this.onLogout,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +175,12 @@ class _Header extends StatelessWidget {
                 ),
               ),
               StatusBadge.fromStatus(company.status, size: BadgeSize.small),
+              const SizedBox(width: AppSpacing.sm),
+              IconButton(
+                onPressed: onLogout,
+                icon: const Icon(Icons.logout_rounded, color: AppColors.white),
+                tooltip: 'Log out',
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.xxl),
