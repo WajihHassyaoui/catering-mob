@@ -1,13 +1,14 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/constants/app_typography.dart';
 import '../../../../../shared/mock_data/mock_meals.dart';
 import '../../../../../shared/models/meal_model.dart';
+import '../../../../../shared/utils/file_picker_helper.dart';
 import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/app_text_field.dart';
 import '../../../../../shared/widgets/common_widgets.dart';
@@ -204,18 +205,13 @@ class _AdminMealsScreenState extends ConsumerState<AdminMealsScreen> {
                                 if (i == 0) {
                                   return GestureDetector(
                                     onTap: () async {
-                                      final picker = ImagePicker();
                                       try {
-                                        final image = await picker.pickImage(
-                                          source: ImageSource.gallery,
-                                          maxWidth: 800,
-                                          maxHeight: 800,
-                                          imageQuality: 85,
-                                        );
-                                        if (image != null) {
-                                          final bytes = await image.readAsBytes();
+                                        final result = await FilePickerHelper.pickImage();
+                                        if (result != null) {
+                                          final bytes = result['bytes'] as Uint8List;
+                                          final name = result['name'] as String;
                                           final base64String = base64Encode(bytes);
-                                          final extension = image.name.split('.').last.toLowerCase();
+                                          final extension = name.split('.').last.toLowerCase();
                                           final mimeType = extension == 'png' ? 'image/png' : 'image/jpeg';
                                           final dataUrl = 'data:$mimeType;base64,$base64String';
                                           

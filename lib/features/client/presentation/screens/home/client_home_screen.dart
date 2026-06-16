@@ -779,17 +779,19 @@ class _CategoryGrid extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: PremiumImage(
-                    imageUrl: category.imageUrl,
-                    height: 82,
-                    borderRadius: BorderRadius.circular(16),
-                    icon: Icons.restaurant_menu_rounded,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+                    child: PremiumImage(
+                      imageUrl: category.imageUrl,
+                      height: double.infinity,
+                      borderRadius: BorderRadius.circular(16),
+                      icon: Icons.restaurant_menu_rounded,
+                    ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                   child: Text(
                     category.name,
                     style: AppTypography.titleSm,
