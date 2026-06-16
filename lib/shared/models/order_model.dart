@@ -166,6 +166,55 @@ class OrderModel {
   bool get isCancelled => status == 'cancelled';
   bool get isDelivered => status == 'delivered';
   bool get isActive => !isCancelled && !isDelivered;
+
+  OrderModel copyWith({
+    String? id,
+    String? orderNumber,
+    String? userId,
+    String? companyId,
+    String? companyName,
+    List<OrderItem>? items,
+    String? status,
+    String? deliveryAddress,
+    DateTime? deliveryDate,
+    String? deliveryTime,
+    double? subtotal,
+    double? deliveryFee,
+    double? tax,
+    double? total,
+    String? paymentMethod,
+    String? paymentStatus,
+    String? promoCode,
+    double? discount,
+    String? notes,
+    String? departmentCode,
+    DateTime? createdAt,
+    List<OrderStatusEvent>? statusHistory,
+  }) =>
+      OrderModel(
+        id: id ?? this.id,
+        orderNumber: orderNumber ?? this.orderNumber,
+        userId: userId ?? this.userId,
+        companyId: companyId ?? this.companyId,
+        companyName: companyName ?? this.companyName,
+        items: items ?? this.items,
+        status: status ?? this.status,
+        deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+        deliveryDate: deliveryDate ?? this.deliveryDate,
+        deliveryTime: deliveryTime ?? this.deliveryTime,
+        subtotal: subtotal ?? this.subtotal,
+        deliveryFee: deliveryFee ?? this.deliveryFee,
+        tax: tax ?? this.tax,
+        total: total ?? this.total,
+        paymentMethod: paymentMethod ?? this.paymentMethod,
+        paymentStatus: paymentStatus ?? this.paymentStatus,
+        promoCode: promoCode ?? this.promoCode,
+        discount: discount ?? this.discount,
+        notes: notes ?? this.notes,
+        departmentCode: departmentCode ?? this.departmentCode,
+        createdAt: createdAt ?? this.createdAt,
+        statusHistory: statusHistory ?? this.statusHistory,
+      );
 }
 
 class OrderStatusEvent {

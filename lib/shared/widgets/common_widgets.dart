@@ -180,78 +180,84 @@ class DashboardStatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.cardPadding),
-        decoration: BoxDecoration(
-          gradient: AppColors.cardGradient,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(color: AppColors.white.withAlpha(190)),
-          boxShadow: const [
-            BoxShadow(
-              color: AppColors.ambientShadow,
-              blurRadius: 24,
-              offset: Offset(0, 14),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: color.withAlpha(24),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: color.withAlpha(32)),
-                  ),
-                  child: Icon(icon, color: color, size: 21),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final useSpacer = constraints.hasBoundedHeight;
+          return Container(
+            padding: const EdgeInsets.all(AppSpacing.cardPadding),
+            decoration: BoxDecoration(
+              gradient: AppColors.cardGradient,
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              border: Border.all(color: AppColors.white.withAlpha(190)),
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.ambientShadow,
+                  blurRadius: 24,
+                  offset: Offset(0, 14),
                 ),
-                const Spacer(),
-                if (onTap != null)
-                  Icon(Icons.arrow_forward_rounded, size: 18, color: color),
               ],
             ),
-            const Spacer(),
-            Text(
-              value,
-              style:
-                  AppTypography.headingMd.copyWith(color: AppColors.charcoal),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              title,
-              style: AppTypography.bodySm.copyWith(color: AppColors.mutedText),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                subtitle!,
-                style: AppTypography.caption.copyWith(color: color),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-            if (progress > 0) ...[
-              const SizedBox(height: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(100),
-                child: LinearProgressIndicator(
-                  minHeight: 5,
-                  value: progress.clamp(0, 1).toDouble(),
-                  color: color,
-                  backgroundColor: color.withAlpha(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: color.withAlpha(24),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: color.withAlpha(32)),
+                      ),
+                      child: Icon(icon, color: color, size: 21),
+                    ),
+                    const Spacer(),
+                    if (onTap != null)
+                      Icon(Icons.arrow_forward_rounded, size: 18, color: color),
+                  ],
                 ),
-              ),
-            ],
-          ],
-        ),
+                if (useSpacer) const Spacer() else const SizedBox(height: AppSpacing.lg),
+                Text(
+                  value,
+                  style:
+                      AppTypography.headingMd.copyWith(color: AppColors.charcoal),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  title,
+                  style: AppTypography.bodySm.copyWith(color: AppColors.mutedText),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    subtitle!,
+                    style: AppTypography.caption.copyWith(color: color),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                if (progress > 0) ...[
+                  const SizedBox(height: 10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: LinearProgressIndicator(
+                      minHeight: 5,
+                      value: progress.clamp(0, 1).toDouble(),
+                      color: color,
+                      backgroundColor: color.withAlpha(24),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
       ),
     ).animate().fade(duration: 260.ms).slideY(begin: 0.08, end: 0);
   }

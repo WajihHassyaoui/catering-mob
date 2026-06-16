@@ -19,6 +19,7 @@ import '../features/client/presentation/screens/profile/my_reviews_screen.dart';
 import '../features/company/presentation/navigation/company_navigation.dart';
 import '../features/client/presentation/screens/orders/track_order_screen.dart';
 import '../features/client/presentation/screens/meals/meal_detail_screen.dart';
+import '../features/company/presentation/screens/group_orders/company_group_order_detail_screen.dart';
 import '../features/admin/presentation/navigation/admin_navigation.dart';
 import '../core/constants/app_constants.dart';
 import '../shared/mock_data/mock_data.dart';
@@ -134,8 +135,9 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
               GoRoute(
                 path: 'group-orders/:id',
-                builder: (_, state) => _PlaceholderScreen(
-                    'Group Order: ${state.pathParameters['id']}'),
+                builder: (_, state) => CompanyGroupOrderDetailScreen(
+                  groupOrderId: state.pathParameters['id'] ?? '',
+                ),
               ),
               GoRoute(
                 path: 'invoices/:id',

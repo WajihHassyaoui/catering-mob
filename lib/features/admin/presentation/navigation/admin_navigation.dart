@@ -17,12 +17,12 @@ class AdminNavigation extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(adminNavIndexProvider);
 
-    const screens = [
-      AdminDashboardScreen(),
-      CompaniesScreen(),
-      AdminMealsScreen(),
-      AdminOrdersScreen(),
-      AdminCateringScreen(),
+    final screens = [
+      const AdminDashboardScreen(),
+      const CompaniesScreen(),
+      const AdminMealsScreen(),
+      const AdminOrdersScreen(),
+      const AdminCateringScreen(),
     ];
 
     return RoleBasedAppScaffold(

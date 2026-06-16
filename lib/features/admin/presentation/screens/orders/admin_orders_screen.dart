@@ -10,11 +10,16 @@ import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/common_widgets.dart';
 import '../../../../../shared/widgets/status_badge.dart';
 
-class AdminOrdersScreen extends ConsumerWidget {
+class AdminOrdersScreen extends ConsumerStatefulWidget {
   const AdminOrdersScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdminOrdersScreen> createState() => _AdminOrdersScreenState();
+}
+
+class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
+  @override
+  Widget build(BuildContext context) {
     final orders = MockData.orders;
     final statuses = [
       'pending',
@@ -70,7 +75,36 @@ class AdminOrdersScreen extends ConsumerWidget {
               final laneOrders =
                   orders.where((order) => order.status == status).toList();
               if (laneOrders.isEmpty) return const SizedBox.shrink();
-              return _StatusLane(status: status, orders: laneOrders);
+              return _StatusLane(
+                status: status,
+                orders: laneOrders,
+                onAdvanceOrder: (order) {
+                  final nextStatusMap = {
+                    'pending': 'confirmed',
+                    'confirmed': 'preparing',
+                    'preparing': 'out_for_delivery',
+                    'out_for_delivery': 'delivered',
+                  };
+                  final nextStatus = nextStatusMap[order.status];
+                  if (nextStatus != null) {
+                    setState(() {
+                      final idx =
+                          MockData.orders.indexWhere((o) => o.id == order.id);
+                      if (idx != -1) {
+                        MockData.orders[idx] =
+                            order.copyWith(status: nextStatus);
+                      }
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            'Order ${order.orderNumber} advanced to ${nextStatus.replaceAll('_', ' ')}'),
+                        backgroundColor: AppColors.oliveGreen,
+                      ),
+                    );
+                  }
+                },
+              );
             }),
           ],
         ),
@@ -82,8 +116,13 @@ class AdminOrdersScreen extends ConsumerWidget {
 class _StatusLane extends StatelessWidget {
   final String status;
   final List<OrderModel> orders;
+  final ValueChanged<OrderModel> onAdvanceOrder;
 
-  const _StatusLane({required this.status, required this.orders});
+  const _StatusLane({
+    required this.status,
+    required this.orders,
+    required this.onAdvanceOrder,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +140,11 @@ class _StatusLane extends StatelessWidget {
           ...orders.asMap().entries.map(
                 (entry) => Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: _AdminOrderCard(order: entry.value, index: entry.key),
+                  child: _AdminOrderCard(
+                    order: entry.value,
+                    index: entry.key,
+                    onAdvance: () => onAdvanceOrder(entry.value),
+                  ),
                 ),
               ),
         ],
@@ -125,8 +168,13 @@ class _StatusLane extends StatelessWidget {
 class _AdminOrderCard extends StatelessWidget {
   final OrderModel order;
   final int index;
+  final VoidCallback onAdvance;
 
-  const _AdminOrderCard({required this.order, required this.index});
+  const _AdminOrderCard({
+    required this.order,
+    required this.index,
+    required this.onAdvance,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +252,7 @@ class _AdminOrderCard extends StatelessWidget {
                 ? Icons.check_circle_outline_rounded
                 : Icons.arrow_forward_rounded,
             size: AppButtonSize.small,
-            onPressed: order.isDelivered ? null : () {},
+            onPressed: order.isDelivered ? null : onAdvance,
           ),
         ],
       ),
