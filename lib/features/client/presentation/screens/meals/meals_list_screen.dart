@@ -65,9 +65,21 @@ class MealsListScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Curated menu',
-                              style:
-                                  AppTypography.displayMedium.copyWith(fontSize: 34)),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text('Curated menu',
+                                    style: AppTypography.displayMedium
+                                        .copyWith(fontSize: 34)),
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              const Padding(
+                                padding: EdgeInsets.only(top: 4),
+                                child: CartIconButton(),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: AppSpacing.sm),
                           Text(
                             'Office-friendly meals with clear nutrition, prep times, and dietary flags.',
@@ -199,18 +211,6 @@ class MealsListScreen extends ConsumerWidget {
                                     mealImageUrl: meal.imageUrl,
                                     unitPrice: meal.price,
                                   ));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('${meal.name} added to cart!'),
-                                      backgroundColor: AppColors.oliveGreen,
-                                      duration: const Duration(seconds: 2),
-                                      action: SnackBarAction(
-                                        label: 'VIEW CART',
-                                        textColor: Colors.white,
-                                        onPressed: () => showCartSheet(context, ref),
-                                      ),
-                                    ),
-                                  );
                                 }
                               },
                             ),

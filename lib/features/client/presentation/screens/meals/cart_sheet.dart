@@ -17,6 +17,95 @@ void showCartSheet(BuildContext context, WidgetRef ref) {
   );
 }
 
+/// A tappable cart (panier) icon with a live item-count badge.
+///
+/// Watches [cartProvider] so the badge updates the moment a meal is added, and
+/// opens the cart sheet on tap so the order can be managed from anywhere in the
+/// meals section. Use [flat] for a borderless, shadowless variant (e.g. over an
+/// app-bar image) and the colour overrides to match the surrounding surface.
+class CartIconButton extends ConsumerWidget {
+  final Color? backgroundColor;
+  final Color? iconColor;
+  final double size;
+  final bool flat;
+
+  const CartIconButton({
+    super.key,
+    this.backgroundColor,
+    this.iconColor,
+    this.size = 46,
+    this.flat = false,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cart = ref.watch(cartProvider);
+    final totalItems = cart.fold(0, (s, c) => s + c.quantity);
+
+    return GestureDetector(
+      onTap: () => showCartSheet(context, ref),
+      behavior: HitTestBehavior.opaque,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: size,
+            height: size,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: backgroundColor ?? AppColors.warmIvory,
+              shape: BoxShape.circle,
+              border: flat ? null : Border.all(color: AppColors.softBorder),
+              boxShadow: flat
+                  ? null
+                  : const [
+                      BoxShadow(
+                        color: AppColors.ambientShadow,
+                        blurRadius: 16,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+            ),
+            child: Icon(
+              totalItems > 0
+                  ? Icons.shopping_cart_rounded
+                  : Icons.shopping_cart_outlined,
+              color: iconColor ?? AppColors.oliveGreen,
+              size: size * 0.46,
+            ),
+          ),
+          if (totalItems > 0)
+            Positioned(
+              right: -3,
+              top: -3,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.terracotta,
+                  borderRadius: BorderRadius.circular(12),
+                  border:
+                      Border.all(color: AppColors.creamBackground, width: 2),
+                ),
+                child: Text(
+                  totalItems > 99 ? '99+' : '$totalItems',
+                  textAlign: TextAlign.center,
+                  style: AppTypography.caption.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 10,
+                    height: 1.1,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CartSheet extends ConsumerWidget {
   const _CartSheet();
 

@@ -89,6 +89,15 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
                   ),
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: CartIconButton(
+                  flat: true,
+                  size: 40,
+                  backgroundColor: AppColors.white.withAlpha(204),
+                  iconColor: AppColors.charcoal,
+                ),
+              ),
             ],
             flexibleSpace: FlexibleSpaceBar(
               stretchModes: const [
@@ -404,16 +413,6 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
                     mealName: meal.name,
                     mealImageUrl: meal.imageUrl,
                     unitPrice: meal.price,
-                  ));
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('${meal.name} added to cart!'),
-                    backgroundColor: AppColors.oliveGreen,
-                    duration: const Duration(seconds: 2),
-                    action: SnackBarAction(
-                      label: 'VIEW CART',
-                      textColor: Colors.white,
-                      onPressed: () => showCartSheet(context, ref),
-                    ),
                   ));
                 },
               ),
